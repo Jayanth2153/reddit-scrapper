@@ -1522,45 +1522,67 @@ elif page == "Higgsfield Credits":
     c4.markdown(metric_card("Generations Logged",  len(hf.credit_history()),       "",                  "#7c3aed"), unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown('<div style="color:var(--c-t1);font-weight:700;font-size:18px;margin-bottom:12px">Recent Generations</div>', unsafe_allow_html=True)
+    st.markdown('<div style="color:var(--c-t1);font-weight:700;font-size:18px;margin-bottom:12px">Download History</div>', unsafe_allow_html=True)
 
     history = hf.credit_history()
     if not history:
         st.info("No generations logged yet. Use Content Studio to generate images or videos.")
     else:
-        # Table header
-        st.markdown(
-            '<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 2fr;'
-            'background:var(--c-card);border:1px solid var(--c-b2);border-radius:10px 10px 0 0;padding:10px 14px">'
-            + "".join(f'<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em">{h}</div>'
-                      for h in ["Date", "Type", "Model", "Credits", "Status", "Prompt"])
-            + '</div>',
-            unsafe_allow_html=True,
-        )
-        for entry in history:
-            created  = entry.get("created_at","")[:16].replace("T"," ")
-            etype    = entry.get("type","?").upper()
-            model    = entry.get("model","?").split("/")[-1]
-            creds    = entry.get("credits", 0)
-            status_  = entry.get("status","?")
-            prompt   = entry.get("prompt","")[:50]
-            url      = entry.get("result_url","")
-            s_color  = "#10b981" if status_ == "completed" else "#f59e0b"
+        img_history = [e for e in history if e.get("type","").lower() in ("image","text_to_image","img")]
+        vid_history = [e for e in history if e.get("type","").lower() in ("video","text_to_video","vid")]
+        other_history = [e for e in history if e not in img_history and e not in vid_history]
 
+        tab_img_h, tab_vid_h = st.tabs([
+            f"Images ({len(img_history)})",
+            f"Videos ({len(vid_history) + len(other_history)})",
+        ])
+
+        def _render_history_table(entries):
+            if not entries:
+                st.caption("Nothing here yet.")
+                return
             st.markdown(
-                f'<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 2fr;'
-                f'background:var(--c-row);border:1px solid var(--c-b1);border-top:none;padding:10px 14px">'
-                f'<div style="color:var(--c-t2);font-size:12px">{created}</div>'
-                f'<div style="color:var(--c-t1);font-size:12px;font-weight:600">{etype}</div>'
-                f'<div style="color:var(--c-t1);font-size:12px">{model}</div>'
-                f'<div style="color:#f59e0b;font-size:13px;font-weight:700">{creds}</div>'
-                f'<div style="color:{s_color};font-size:12px">{status_.title()}</div>'
-                f'<div style="color:var(--c-t2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{prompt}{"…" if len(entry.get("prompt","")) > 50 else ""}</div>'
-                f'</div>',
+                '<div style="display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1fr 2fr;'
+                'background:var(--c-card);border:1px solid var(--c-b2);border-radius:10px 10px 0 0;padding:10px 14px">'
+                + "".join(f'<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em">{h}</div>'
+                          for h in ["Date", "Model", "Credits", "Status", "Prompt"])
+                + '</div>',
                 unsafe_allow_html=True,
             )
-            if url:
-                st.markdown(f'<div style="background:var(--c-bg);border:1px solid var(--c-b1);border-top:none;padding:4px 14px"><a href="{url}" target="_blank" style="color:var(--c-link);font-size:11px">View result</a></div>', unsafe_allow_html=True)
+            for entry in entries:
+                created = entry.get("created_at","")[:16].replace("T"," ")
+                model   = entry.get("model","?").split("/")[-1]
+                creds   = entry.get("credits", 0)
+                status_ = entry.get("status","?")
+                prompt  = entry.get("prompt","")[:55]
+                url     = entry.get("result_url","")
+                s_color = "#10b981" if status_ == "completed" else "#f59e0b"
+                st.markdown(
+                    f'<div style="display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1fr 2fr;'
+                    f'background:var(--c-row);border:1px solid var(--c-b1);border-top:none;padding:10px 14px">'
+                    f'<div style="color:var(--c-t2);font-size:12px">{created}</div>'
+                    f'<div style="color:var(--c-t1);font-size:12px">{model}</div>'
+                    f'<div style="color:#f59e0b;font-size:13px;font-weight:700">{creds}</div>'
+                    f'<div style="color:{s_color};font-size:12px">{status_.title()}</div>'
+                    f'<div style="color:var(--c-t2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+                    f'{prompt}{"…" if len(entry.get("prompt","")) > 55 else ""}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                if url:
+                    dl_col, _ = st.columns([1, 5])
+                    dl_col.markdown(
+                        f'<div style="background:var(--c-bg);border:1px solid var(--c-b1);border-top:none;padding:6px 14px">'
+                        f'<a href="{url}" target="_blank" style="color:var(--c-link);font-size:11px;font-weight:600">Download / View</a>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
+        with tab_img_h:
+            _render_history_table(img_history)
+
+        with tab_vid_h:
+            _render_history_table(vid_history + other_history)
 
 # =============================================================================
 # PAGE 9 — ACCOUNTS MANAGER
