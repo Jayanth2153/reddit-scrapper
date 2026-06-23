@@ -1687,13 +1687,14 @@ elif page == "Accounts Manager":
             risk     = acc.get("risk", "Low")
             pm       = acc.get("posts_made", 0)
             vp       = acc.get("verified_pass", 0)
+            vf       = acc.get("verified_fail", 0)
             lu       = (acc.get("last_used", "") or "Never")[:10]
-            _has_pwd = bool(acc.get("password", ""))
 
-            is_active   = status_a == "active"
-            status_dot  = "#10b981" if is_active else "#6b7280"
-            status_txt  = "Active" if is_active else "Paused"
-            toggle_lbl  = "Pause" if is_active else "Resume"
+            is_active  = status_a == "active"
+            status_dot = "#10b981" if is_active else "#6b7280"
+            status_txt = "Active" if is_active else "Paused"
+            toggle_lbl = "Pause" if is_active else "Resume"
+            risk_color = {"Low": "#10b981", "Medium": "#f59e0b", "High": "#ef4444"}.get(risk, "#6b7280")
 
             st.markdown(
                 f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
@@ -1708,36 +1709,35 @@ elif page == "Accounts Manager":
                 f'color:#FF4500;font-size:16px;font-weight:800">{uname[0].upper()}</div>'
                 f'<div>'
                 f'<div style="color:var(--c-t1);font-size:15px;font-weight:700">u/{uname}</div>'
-                f'<div style="color:var(--c-t3);font-size:12px">{role} · Risk: {risk}</div>'
+                f'<div style="display:flex;gap:8px;align-items:center;margin-top:3px;flex-wrap:wrap">'
+                f'<span style="color:var(--c-t3);font-size:12px">{role}</span>'
+                f'<span style="background:{risk_color}22;color:{risk_color};font-size:11px;font-weight:700;'
+                f'padding:1px 8px;border-radius:20px">{risk} risk</span>'
+                f'<span style="display:flex;align-items:center;gap:4px">'
+                f'<span style="width:6px;height:6px;border-radius:50%;background:{status_dot};display:inline-block"></span>'
+                f'<span style="color:{status_dot};font-size:11px;font-weight:600">{status_txt}</span>'
+                f'</span>'
                 f'</div>'
-                f'<div style="display:flex;align-items:center;gap:6px">'
-                f'<span style="width:7px;height:7px;border-radius:50%;background:{status_dot};display:inline-block"></span>'
-                f'<span style="color:{status_dot};font-size:12px;font-weight:600">{status_txt}</span>'
                 f'</div>'
                 f'</div>'
-
-                # Reddit link
-                f'<a href="https://www.reddit.com/login" target="_blank" '
-                f'style="background:#FF4500;color:#fff;padding:7px 16px;border-radius:8px;'
-                f'font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">Open Reddit Login</a>'
+                f'<a href="https://www.reddit.com/user/{uname}" target="_blank" '
+                f'style="background:var(--c-b1);color:var(--c-t2);padding:7px 14px;border-radius:8px;'
+                f'font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">View Profile ↗</a>'
                 f'</div>'
 
                 # Stats row
-                f'<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:{"12px" if acc.get("notes") else "6px"}">'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Karma</div>'
-                f'<div style="color:#FF4500;font-size:18px;font-weight:800">{acc.get("karma", "—"):,}</div></div>'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Account Age</div>'
-                f'<div style="color:var(--c-t1);font-size:13px;font-weight:600;margin-top:4px">{acc.get("account_age","—")}</div></div>'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Posts Made</div>'
-                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{pm}</div></div>'
+                f'<div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:{"12px" if acc.get("notes") else "6px"}">'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Comments Posted</div>'
+                f'<div style="color:var(--c-t1);font-size:20px;font-weight:800">{pm}</div></div>'
                 f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Verified Pass</div>'
-                f'<div style="color:#10b981;font-size:18px;font-weight:800">{vp}</div></div>'
+                f'<div style="color:#10b981;font-size:20px;font-weight:800">{vp}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Verified Fail</div>'
+                f'<div style="color:#ef4444;font-size:20px;font-weight:800">{vf}</div></div>'
                 f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Last Used</div>'
-                f'<div style="color:var(--c-t1);font-size:13px;font-weight:600;margin-top:4px">{lu}</div></div>'
+                f'<div style="color:var(--c-t1);font-size:13px;font-weight:600;margin-top:5px">{lu}</div></div>'
                 f'</div>'
 
-                # Notes
-                + (f'<div style="color:var(--c-t3);font-size:12px;margin-bottom:10px">{acc.get("notes","")}</div>'
+                + (f'<div style="color:var(--c-t3);font-size:12px;margin-bottom:8px">{acc.get("notes","")}</div>'
                    if acc.get("notes") else "")
 
                 + f'</div>',
