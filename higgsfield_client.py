@@ -274,7 +274,18 @@ class HiggsFieldClient:
         if not CREDITS_FILE.exists():
             return []
         try:
-            return json.loads(CREDITS_FILE.read_text(encoding="utf-8"))
+            import uuid as _uuid
+            data = json.loads(CREDITS_FILE.read_text(encoding="utf-8"))
+            changed = False
+            for entry in data:
+                if not entry.get("request_id"):
+                    entry["request_id"] = str(_uuid.uuid4())
+                    changed = True
+            if changed:
+                CREDITS_FILE.write_text(
+                    json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
+                )
+            return data
         except Exception:
             return []
 
