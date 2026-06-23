@@ -1053,7 +1053,7 @@ elif page == "Comment Studio":
             )
 
             # ── Action buttons ──
-            b1, b2, b3, b4, b5 = st.columns([2, 2, 2, 2, 2])
+            b1, b2, b3, b4, b5, b6 = st.columns([2, 2, 1, 1, 2, 1])
 
             if b1.button("Copy Comment", key=f"cs_copy_{pid}", type="primary", use_container_width=True):
                 update_comment_by_post_id(pid, {"comment_status": "copied"})
@@ -1064,20 +1064,18 @@ elif page == "Comment Studio":
                 st.success("Marked as posted!")
                 st.rerun()
 
-            if b3.button("✓ Pass", key=f"cs_pass_{pid}", use_container_width=True):
+            if b3.button("Pass", key=f"cs_pass_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {
                     "verification_status": "pass",
                     "verified_at": datetime.utcnow().isoformat(),
                 })
-                st.success("Marked Pass.")
                 st.rerun()
 
-            if b4.button("✗ Fail", key=f"cs_fail_{pid}", use_container_width=True):
+            if b4.button("Fail", key=f"cs_fail_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {
                     "verification_status": "fail",
                     "verified_at": datetime.utcnow().isoformat(),
                 })
-                st.warning("Marked Fail.")
                 st.rerun()
 
             if b5.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
