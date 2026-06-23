@@ -22,17 +22,18 @@ from storage import get_today_commented_count
 # ❶  CONFIGURE YOUR BOT HERE
 # ══════════════════════════════════════════════════════════════════════
 
-DOMAIN       = scraper_cfg.domain           # e.g. "machine learning"
-SUBREDDITS   = scraper_cfg.subreddits       # e.g. ["MachineLearning", "Python"]
-KEYWORDS     = scraper_cfg.keywords         # e.g. ["help", "advice", "tutorial"]
-MY_EXPERTISE = scraper_cfg.your_expertise   # shown to Claude for context
+DOMAIN         = scraper_cfg.domain
+SUBREDDITS     = scraper_cfg.subreddits
+KEYWORDS       = scraper_cfg.keywords
+MY_EXPERTISE   = scraper_cfg.your_expertise
 
-MIN_SCORE    = scraper_cfg.min_score        # filter: minimum upvotes
-MIN_COMMENTS = scraper_cfg.min_comments     # filter: minimum comment count
-MAX_POSTS    = scraper_cfg.max_posts        # top N posts to generate comments for
-TIME_FILTER  = scraper_cfg.time_filter      # hour | day | week | month
-SORT_BY      = scraper_cfg.sort_by          # hot | new | top | rising
-OUTPUT_FMT   = scraper_cfg.output_format    # json | csv | both
+MIN_SCORE      = scraper_cfg.min_score
+MIN_COMMENTS   = scraper_cfg.min_comments
+MAX_POSTS      = scraper_cfg.max_posts
+DAILY_LIMIT    = scraper_cfg.daily_scrape_limit
+TIME_FILTER    = scraper_cfg.time_filter
+SORT_BY        = scraper_cfg.sort_by
+OUTPUT_FMT     = scraper_cfg.output_format
 
 # ══════════════════════════════════════════════════════════════════════
 
