@@ -42,9 +42,10 @@ class ScraperConfig:
     )
 
     # ----- Engagement thresholds -----
-    min_score: int      = 5     # Minimum upvotes for a post to qualify
-    min_comments: int   = 2     # Minimum comment count
-    max_posts: int      = 10    # How many top posts to generate comments for
+    min_score: int        = 5     # Minimum upvotes for a post to qualify
+    min_comments: int     = 2     # Minimum comment count
+    max_posts: int        = 15    # Max posts to score/rank per run
+    daily_scrape_limit: int = 20  # Hard cap: total commented posts saved per day
 
     # ----- Fetch settings -----
     time_filter: str    = "week"  # hour | day | week | month | year | all
