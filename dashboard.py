@@ -2016,73 +2016,10 @@ elif page == "Media Lab":
                             'Add accounts in Account Roster</div>',
                             unsafe_allow_html=True,
                         )
-                    # Build pre-filled Reddit submit URL
-                    import urllib.parse as _up, base64 as _rb64
-                    _rt_full = _mtext or ""
-                    _rt_title = ""
-                    for _rtl in _rt_full.splitlines():
-                        if _rtl.startswith("Title:"):
-                            _rt_title = _rtl[6:].strip()
-                            break
-                    _rt_body = "\n".join(
-                        l for l in _rt_full.splitlines()
-                        if not l.startswith("Title:")
-                    ).strip()
-                    _fallback_title = _mprompt[:120] if _mprompt else "Aptori"
-                    if _murl:
-                        # Image/video: link post (Reddit link posts have no body field)
-                        # → copy body text to clipboard on click so user can paste as first comment
-                        _submit_url = (
-                            "https://old.reddit.com/submit?"
-                            + _up.urlencode({
-                                "url":   _murl,
-                                "title": _rt_title or _fallback_title,
-                            })
-                        )
-                        _submit_hint = "Image/title pre-filled. Body text copied to clipboard — paste it as your first comment after posting."
-                    elif _rt_title:
-                        # Text-only post: pre-fill title + body via selftext
-                        _submit_url = (
-                            "https://old.reddit.com/submit?"
-                            + _up.urlencode({
-                                "title":    _rt_title,
-                                "selftext": _rt_body,
-                            })
-                        )
-                        _submit_hint = "Title and body are pre-filled. Choose a subreddit and post."
-                    else:
-                        _submit_url = "https://www.reddit.com/submit"
-                        _submit_hint = "Copy the post text first, then paste it on Reddit."
-
-                    # For image/video posts: button copies body to clipboard AND opens Reddit
-                    _body_b64 = _rb64.b64encode(_rt_body.encode()).decode() if _rt_body else ""
-                    st.markdown(
-                        f'<a href="{_submit_url}" target="_blank" '
-                        f'onclick="(function(){{'
-                        f'var raw=\'{_body_b64}\';'
-                        f'if(!raw)return;'
-                        f'var text=\'\';'
-                        f'try{{text=decodeURIComponent(escape(atob(raw)));}}catch(ex){{text=raw;}}'
-                        f'var ta=document.createElement(\'textarea\');'
-                        f'ta.value=text;ta.setAttribute(\'readonly\',\'\');'
-                        f'ta.style.cssText=\'position:absolute;left:-9999px;top:0;opacity:0\';'
-                        f'document.body.appendChild(ta);ta.select();'
-                        f'try{{document.execCommand(\'copy\');}}catch(ex){{}}'
-                        f'document.body.removeChild(ta);'
-                        f'}})()" '
-                        f'style="display:block;width:100%;text-align:center;'
-                        f'background:transparent;border:1px solid rgba(250,250,250,0.2);'
-                        f'border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;'
-                        f'color:#fafafa;font-family:inherit;font-weight:500;line-height:1.5;'
-                        f'text-decoration:none;transition:border-color .15s,color .15s;'
-                        f'box-sizing:border-box">'
-                        f'Open Reddit to Post ↗</a>',
-                        unsafe_allow_html=True,
-                    )
-                    st.markdown(
-                        f'<div style="color:var(--c-t3);font-size:10px;text-align:center;'
-                        f'line-height:1.5;margin-top:4px">{_submit_hint}</div>',
-                        unsafe_allow_html=True,
+                    st.link_button(
+                        "Open Reddit to Post ↗",
+                        "https://www.reddit.com/submit",
+                        use_container_width=True,
                     )
 
                 # ── Separator + footer status row ────────────────────────────
