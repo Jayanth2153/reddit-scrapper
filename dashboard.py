@@ -854,314 +854,193 @@ elif page == "Human Insights":
 elif page == "Comment Studio":
     st.markdown(section_header("Comment Studio", "Top scraped posts with Claude-generated humanized comments — copy, post, confirm."), unsafe_allow_html=True)
 
-    # ── URL-based generation (primary workflow) ──────────────────────────────
-    st.markdown(
-        '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
-        'padding:20px 24px;margin-bottom:24px;box-shadow:0 2px 10px rgba(0,0,0,.12)">'
-        '<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-        'letter-spacing:.1em;margin-bottom:14px">Generate Comment from Reddit URL</div>',
-        unsafe_allow_html=True,
-    )
-    url_col, btn_col = st.columns([5, 1])
-    post_url_input = url_col.text_input(
-        "Reddit post URL",
-        placeholder="https://www.reddit.com/r/netsec/comments/...",
-        key="studio_url_input",
-        label_visibility="collapsed",
-    )
-    generate_clicked = btn_col.button("Generate", type="primary", use_container_width=True, key="studio_gen_btn")
+    # ── Toolbar ──────────────────────────────────────────────────────────────
+    tb1, tb2, tb3 = st.columns([2, 2, 4])
+    run_scraper = tb1.button("Fetch 10 Fresh Posts", type="primary", use_container_width=True, key="cs_run_scraper")
+    show_filter = tb2.selectbox("Filter", ["All", "Not Posted", "Posted", "Pass", "Fail"], key="cs_filter", label_visibility="collapsed")
 
-    if generate_clicked and post_url_input.strip():
-        with st.spinner("Fetching post and generating comment with Claude..."):
+    if run_scraper:
+        with st.spinner("Scraping Reddit and generating comments with Claude — this takes ~2 minutes..."):
             try:
-                fetched = fetch_post_from_url(post_url_input.strip())
-                suggestion = generate_comment_for_post(fetched)
-                if suggestion:
-                    st.session_state["studio_generated_post"] = fetched
-                    st.session_state["studio_generated_cmt"]  = suggestion
-                    # Persist to storage so it shows in Publishing Tracker
-                    post_obj = RedditPost(
-                        id=fetched["id"], title=fetched["title"], selftext=fetched.get("selftext",""),
-                        url=fetched["permalink"], subreddit=fetched["subreddit"],
-                        score=fetched.get("score",0), num_comments=fetched.get("num_comments",0),
-                        upvote_ratio=fetched.get("upvote_ratio",0.9),
-                        created_utc=fetched.get("created_utc", time.time()),
-                        permalink=fetched["permalink"], author=fetched.get("author",""),
-                        keyword=fetched.get("keyword", scraper_cfg.domain),
-                    )
-                    save_results([{"post": post_obj, "suggestion": suggestion}])
-                    st.success("Comment generated and saved!")
+                result = subprocess.run(
+                    ["python", "run_daily.py"],
+                    cwd=str(Path.cwd()),
+                    capture_output=True, text=True, timeout=300
+                )
+                if result.returncode == 0:
+                    st.success("Done! Scroll down to see your 10 fresh posts.")
+                    st.rerun()
                 else:
-                    st.error("Claude returned no comment. Check your ANTHROPIC_API_KEY in .env")
+                    st.error(f"Scraper error:\n{result.stderr[-800:]}")
+            except subprocess.TimeoutExpired:
+                st.error("Timed out after 5 minutes. Reddit may be rate-limiting — try again in a few minutes.")
             except Exception as e:
                 st.error(f"Error: {e}")
 
-    # Show freshly generated result
-    _gen_post = st.session_state.get("studio_generated_post")
-    _gen_cmt  = st.session_state.get("studio_generated_cmt")
-    if _gen_post and _gen_cmt:
-        cmt_text = _gen_cmt.get("comment", "")
-        tone_lbl = _gen_cmt.get("tone", "")
-        st.markdown(
-            f'<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:12px;'
-            f'padding:20px;margin-top:16px">'
-            f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-            f'<span style="color:var(--c-t1);font-weight:700;font-size:14px">{_gen_post.get("title","")[:70]}</span>'
-            f'<span style="background:#1e3a2f;color:#10b981;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">{tone_lbl.title() if tone_lbl else "Generated"}</span>'
-            f'</div>'
-            f'<div style="background:var(--c-input);border-radius:8px;padding:14px;font-size:13px;'
-            f'line-height:1.7;color:var(--c-t1b);white-space:pre-wrap;margin-bottom:12px">{cmt_text}</div>'
-            f'<div style="color:var(--c-t3);font-size:11px">{len(cmt_text)} chars · {len(cmt_text.split())} words</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-        copy_col, clear_col = st.columns([3, 1])
-        if copy_col.button("Copy Comment", type="primary", use_container_width=True, key="gen_copy"):
-            st.code(cmt_text, language=None)
-        if clear_col.button("Clear", use_container_width=True, key="gen_clear"):
-            del st.session_state["studio_generated_post"]
-            del st.session_state["studio_generated_cmt"]
-            st.rerun()
+    # ── Load data ─────────────────────────────────────────────────────────────
+    data_cs      = get_all()
+    tracker_cs   = get_publishing_tracker()
+    insight_map  = {p.get("id",""): p for p in insights}
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # ── Existing comments from scraper / previous runs ────────────────────────
-    st.markdown(
-        '<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-        'letter-spacing:.1em;margin:24px 0 12px">Previously Generated Comments</div>',
-        unsafe_allow_html=True,
-    )
-
-    # Reload data after possible save above
-    data_fresh    = get_all()
-    comments_all  = data_fresh.get("comments", [])
-    tracker_fresh = get_publishing_tracker()
-    post_ids      = [p.get("id","") for p in insights]
-    post_map      = {p.get("id",""): p for p in insights}
-    cmt_map       = {c.get("post_id",""): c for c in tracker_fresh}
-    commented_ids_set = {c.get("post_id") for c in comments_all if c.get("comment")}
-
-    # Also include posts saved from URL generation (may not be in insights)
-    for c in comments_all:
+    # Build unified post list: comments are the source of truth
+    # Each comment entry is one card (most recent comment per post_id)
+    seen_pids = set()
+    cs_items  = []
+    for c in reversed(data_cs.get("comments", [])):
         pid = c.get("post_id","")
-        if pid and pid not in post_map:
-            post_map[pid] = {
-                "id": pid, "title": c.get("post_title",""), "subreddit": c.get("subreddit",""),
-                "permalink": c.get("permalink",""), "score": 0, "num_comments": 0,
-                "selftext": "", "keyword": c.get("keyword",""), "top_comments": [],
-            }
-            if pid not in post_ids:
-                post_ids.append(pid)
+        if not pid or pid in seen_pids:
+            continue
+        seen_pids.add(pid)
+        post_info = insight_map.get(pid, {})
+        cs_items.append({
+            "post_id":    pid,
+            "title":      c.get("post_title","") or post_info.get("title","(no title)"),
+            "subreddit":  c.get("subreddit","")  or post_info.get("subreddit",""),
+            "permalink":  c.get("permalink","")  or post_info.get("permalink",""),
+            "score":      post_info.get("score", 0),
+            "num_comments": post_info.get("num_comments", 0),
+            "keyword":    c.get("keyword",""),
+            "comment":    c.get("comment",""),
+            "tone":       c.get("tone",""),
+            "generated_at": c.get("generated_at",""),
+            "posted":     c.get("posted", False),
+            "comment_status": c.get("comment_status","draft"),
+            "verification_status": c.get("verification_status","pending"),
+        })
 
-    if not post_ids:
-        st.info("No comments yet. Paste a Reddit URL above and click Generate.")
-    else:
-        default_id  = st.session_state.get("studio_post_id", post_ids[0] if post_ids else "")
-        post_titles = {
-            pid: f'{"✓ " if pid in commented_ids_set else "○ "}r/{post_map.get(pid,{}).get("subreddit","")} · {post_map.get(pid,{}).get("title","")[:55]}'
-            for pid in post_ids
-        }
-        sel_id = st.selectbox(
-            "Select post",
-            options=post_ids,
-            format_func=lambda pid: post_titles.get(pid, pid),
-            index=post_ids.index(default_id) if default_id in post_ids else 0,
-            key="studio_selector",
-        )
-        post = post_map.get(sel_id, {})
-        cmt  = cmt_map.get(sel_id, {})
-        existing_cmt = cmt.get("comment", "")
-        cmt_key      = f"studio_cmt_{sel_id}"
-        cst          = cmt.get("comment_status", "draft")
-        reddit_url   = post.get("permalink", "")
-        full_url     = f"https://reddit.com{reddit_url}" if reddit_url and not reddit_url.startswith("http") else reddit_url
+    # Apply filter
+    if show_filter == "Not Posted":
+        cs_items = [x for x in cs_items if not x["posted"]]
+    elif show_filter == "Posted":
+        cs_items = [x for x in cs_items if x["posted"]]
+    elif show_filter == "Pass":
+        cs_items = [x for x in cs_items if x["verification_status"] == "pass"]
+    elif show_filter == "Fail":
+        cs_items = [x for x in cs_items if x["verification_status"] == "fail"]
 
-        # ── Post card ────────────────────────────────────────────────────────
-        isc_val   = intent_score(post)
-        isc_color = "#10b981" if isc_val >= 70 else "#f59e0b" if isc_val >= 45 else "#ef4444"
+    if not cs_items:
         st.markdown(
-            f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
-            f'padding:16px 20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.12);'
-            f'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">'
-            f'<div style="flex:1;min-width:0">'
-            f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Reddit Thread</div>'
-            f'<div style="color:var(--c-t1);font-size:15px;font-weight:700;line-height:1.4;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{post.get("title","No title")}</div>'
-            f'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
-            f'<span style="color:var(--c-t2);font-size:12px">r/{post.get("subreddit","")}</span>'
-            f'<span style="color:var(--c-t2);font-size:12px">↑ {post.get("score",0)}</span>'
-            f'<span style="color:var(--c-t2);font-size:12px">💬 {post.get("num_comments",0)}</span>'
-            f'</div></div>'
-            f'<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">'
-            f'<div style="text-align:center">'
-            f'<div style="color:{isc_color};font-size:28px;font-weight:800;line-height:1">{isc_val}%</div>'
-            f'<div style="color:var(--c-t3);font-size:10px">Intent</div>'
-            f'</div>'
-            f'{badge(status_label(cst), cst) if existing_cmt else badge("No Comment", "draft")}'
-            f'<a href="{full_url}" target="_blank" style="background:#E63946;color:#fff;padding:8px 16px;'
-            f'border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap">Open on Reddit</a>'
-            f'</div></div>',
+            '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
+            'padding:48px;text-align:center;margin-top:20px">'
+            '<div style="font-size:40px;margin-bottom:12px">📭</div>'
+            '<div style="color:var(--c-t1);font-size:16px;font-weight:600;margin-bottom:8px">No posts yet</div>'
+            '<div style="color:var(--c-t3);font-size:13px">Click <b>Fetch 10 Fresh Posts</b> above to scrape Reddit and generate humanized comments.</div>'
+            '</div>',
             unsafe_allow_html=True,
         )
+    else:
+        st.markdown(f'<div style="color:var(--c-t3);font-size:12px;margin-bottom:16px">{len(cs_items)} post{"s" if len(cs_items)!=1 else ""}</div>', unsafe_allow_html=True)
 
-        # ── Two-panel layout ─────────────────────────────────────────────────
-        left, right = st.columns([5, 7], gap="large")
+        for idx, item in enumerate(cs_items):
+            pid      = item["post_id"]
+            cmt_text = item["comment"]
+            posted   = item["posted"]
+            vst      = item["verification_status"]
+            cst      = item["comment_status"]
+            tone     = item["tone"]
+            full_url = item["permalink"] if item["permalink"].startswith("http") else f"https://reddit.com{item['permalink']}"
 
-        with left:
+            # Status colors
+            vst_color = "#10b981" if vst == "pass" else "#ef4444" if vst == "fail" else "#6b7280"
+            vst_label = "PASS" if vst == "pass" else "FAIL" if vst == "fail" else "PENDING"
+            posted_color = "#10b981" if posted else "#6b7280"
+
             st.markdown(
-                '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
-                'padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.1)">'
-                '<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-                'letter-spacing:.1em;margin-bottom:14px">Thread Context</div>',
+                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:16px;'
+                f'margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.12)">'
+
+                # ── Post header ──
+                f'<div style="padding:16px 20px;border-bottom:1px solid var(--c-b1);'
+                f'display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">'
+                f'<div style="flex:1;min-width:0">'
+                f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">'
+                f'<span style="background:var(--c-b1);color:var(--c-t2);font-size:10px;font-weight:700;'
+                f'padding:2px 8px;border-radius:4px">#{idx+1}</span>'
+                f'<span style="color:var(--c-t2);font-size:12px">r/{item["subreddit"]}</span>'
+                f'<span style="color:var(--c-t3);font-size:11px">↑ {item["score"]}</span>'
+                f'<span style="color:var(--c-t3);font-size:11px">💬 {item["num_comments"]}</span>'
+                f'{"" if not tone else f\'<span style="background:#1e3050;color:#93c5fd;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">{tone.title()}</span>\'}'
+                f'</div>'
+                f'<div style="color:var(--c-t1);font-size:14px;font-weight:700;line-height:1.4">{item["title"]}</div>'
+                f'</div>'
+                f'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">'
+                f'<span style="color:{posted_color};font-size:11px;font-weight:700">{"● POSTED" if posted else "○ NOT POSTED"}</span>'
+                f'<span style="background:{vst_color}22;color:{vst_color};font-size:11px;font-weight:700;'
+                f'padding:3px 10px;border-radius:20px">{vst_label}</span>'
+                f'<a href="{full_url}" target="_blank" style="background:#E63946;color:#fff;padding:6px 14px;'
+                f'border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">Open Reddit</a>'
+                f'</div>'
+                f'</div>'
+
+                # ── Comment body ──
+                f'<div style="padding:16px 20px;border-bottom:1px solid var(--c-b1)">'
+                f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
+                f'letter-spacing:.1em;margin-bottom:10px">Claude-Generated Comment</div>'
+                f'<div style="background:var(--c-row);border-radius:10px;padding:14px 16px;'
+                f'font-size:13px;line-height:1.75;color:var(--c-t1b);white-space:pre-wrap">{cmt_text}</div>'
+                f'<div style="color:var(--c-t3);font-size:11px;margin-top:8px">'
+                f'{len(cmt_text)} chars · {len(cmt_text.split())} words</div>'
+                f'</div>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
-            if post.get("selftext"):
-                st.markdown(
-                    f'<div style="color:var(--c-t1b);font-size:13px;line-height:1.6;'
-                    f'padding:12px;background:var(--c-row);border-radius:8px;margin-bottom:14px">'
-                    f'{post["selftext"][:400]}{"…" if len(post["selftext"]) > 400 else ""}</div>',
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown('<div style="color:var(--c-t3);font-size:13px;font-style:italic;margin-bottom:14px">Link post — no body text.</div>', unsafe_allow_html=True)
 
-            hcs = post.get("top_comments", [])
-            if hcs:
-                st.markdown(f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Top Comments ({len(hcs)})</div>', unsafe_allow_html=True)
-                for hc in hcs[:4]:
-                    qs   = comment_quality(hc)
-                    qclr = "#10b981" if qs >= 70 else "#f59e0b" if qs >= 45 else "#9ca3af"
-                    body = hc.get("body","")
-                    st.markdown(
-                        f'<div style="background:var(--c-row);border-radius:10px;padding:12px 14px;'
-                        f'margin-bottom:8px;border-left:3px solid {qclr}">'
-                        f'<div style="display:flex;justify-content:space-between;margin-bottom:6px">'
-                        f'<span style="color:var(--c-link);font-size:12px;font-weight:600">u/{hc.get("author","?")}</span>'
-                        f'<span style="color:{qclr};font-size:11px;font-weight:700">Quality {qs}%</span>'
-                        f'</div>'
-                        f'<div style="color:var(--c-t1b);font-size:13px;line-height:1.55">{body[:220]}{"…" if len(body)>220 else ""}</div>'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
-            else:
-                st.markdown('<div style="color:var(--c-t3);font-size:12px;font-style:italic">No comments captured for this post.</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+            # ── Action buttons ──
+            b1, b2, b3, b4, b5 = st.columns([2, 2, 2, 2, 2])
 
-        with right:
-            st.markdown(
-                '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
-                'padding:20px 24px;box-shadow:0 2px 8px rgba(0,0,0,.1)">',
-                unsafe_allow_html=True,
-            )
+            if b1.button("Copy Comment", key=f"cs_copy_{pid}", type="primary", use_container_width=True):
+                update_comment_by_post_id(pid, {"comment_status": "copied"})
+                st.code(cmt_text, language=None)
 
-            if existing_cmt:
-                tone     = cmt.get("tone","")
-                cq       = comment_quality(cmt)
-                cq_color = "#10b981" if cq >= 70 else "#f59e0b" if cq >= 45 else "#9ca3af"
-                st.markdown(
-                    f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
-                    f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em">Claude-Generated Comment</div>'
-                    f'<div style="display:flex;gap:8px;align-items:center">'
-                    f'{badge(status_label(cst), cst)}'
-                    f'{"" if not tone else badge(tone.title(), "active")}'
-                    f'<span style="color:{cq_color};font-size:12px;font-weight:700">Quality {cq}%</span>'
-                    f'</div></div>',
-                    unsafe_allow_html=True,
-                )
-                preview_text = st.session_state.get(cmt_key, existing_cmt)
-                st.markdown(
-                    f'<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:10px;'
-                    f'padding:16px;margin-bottom:12px;font-size:13px;line-height:1.7;color:var(--c-t1b);'
-                    f'white-space:pre-wrap;min-height:100px">{preview_text}</div>',
-                    unsafe_allow_html=True,
-                )
-                char_count = len(preview_text)
-                word_count = len(preview_text.split())
-                _warn_html = '<span style="color:#f59e0b;font-size:12px">&#9888; Over 10k chars</span>' if char_count > 10000 else ""
-                st.markdown(
-                    f'<div style="display:flex;gap:20px;margin-bottom:16px">'
-                    f'<span style="color:var(--c-t3);font-size:12px">{char_count} characters</span>'
-                    f'<span style="color:var(--c-t3);font-size:12px">{word_count} words</span>'
-                    f'{_warn_html}</div>',
-                    unsafe_allow_html=True,
-                )
-                with st.expander("Edit Comment", expanded=False):
-                    edited = st.text_area("Edit", value=st.session_state.get(cmt_key, existing_cmt), height=200, key=cmt_key, label_visibility="collapsed")
-                    if st.button("Save Edits", key=f"save_edit_{sel_id}"):
-                        update_comment_by_post_id(sel_id, {"comment": edited})
-                        st.success("Saved.")
-                        st.rerun()
+            if b2.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
+                update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
+                # also update in comments list
+                for ci, c in enumerate(data_cs.get("comments",[])):
+                    if c.get("post_id") == pid:
+                        mark_comment_posted(ci)
+                        break
+                st.success("Marked as posted!")
+                st.rerun()
 
-                st.markdown('<div style="border-top:1px solid var(--c-b1);margin:16px 0"></div>', unsafe_allow_html=True)
+            if b3.button("✓ Pass", key=f"cs_pass_{pid}", use_container_width=True):
+                update_comment_by_post_id(pid, {
+                    "verification_status": "pass",
+                    "verified_at": datetime.utcnow().isoformat(),
+                })
+                st.success("Marked Pass.")
+                st.rerun()
 
-                a1, a2, a3 = st.columns(3)
-                if a1.button("Copy Comment", key=f"copy_{sel_id}", type="primary", use_container_width=True):
-                    update_comment_by_post_id(sel_id, {"comment_status": "copied"})
-                    st.success("Ready to paste on Reddit.")
-                    st.code(st.session_state.get(cmt_key, existing_cmt), language=None)
-                if a2.button("Mark as Posted", key=f"posted_{sel_id}", use_container_width=True):
-                    idx = next((i for i, c in enumerate(data_fresh["comments"]) if c.get("post_id") == sel_id), None)
-                    if idx is not None:
-                        mark_comment_posted(idx)
-                    update_comment_by_post_id(sel_id, {"comment_status": "posted"})
-                    st.success("Marked as posted.")
-                # Regenerate button
-                if a3.button("Regenerate", key=f"regen_{sel_id}", use_container_width=True):
-                    with st.spinner("Regenerating with Claude..."):
-                        try:
-                            new_sug = generate_comment_for_post(post)
-                            if new_sug:
-                                update_comment_by_post_id(sel_id, {"comment": new_sug.get("comment",""), "tone": new_sug.get("tone","")})
-                                st.success("Regenerated!")
-                                st.rerun()
-                        except Exception as e:
-                            st.error(f"Error: {e}")
+            if b4.button("✗ Fail", key=f"cs_fail_{pid}", use_container_width=True):
+                update_comment_by_post_id(pid, {
+                    "verification_status": "fail",
+                    "verified_at": datetime.utcnow().isoformat(),
+                })
+                st.warning("Marked Fail.")
+                st.rerun()
 
-                st.markdown('<div style="border-top:1px solid var(--c-b1);margin:16px 0"></div>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<div style="margin-bottom:10px">'
-                    f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Posting Workflow</div>'
-                    f'<div style="display:flex;flex-direction:column;gap:6px">'
-                    + info_row("1. Copy comment above", "use Copy Comment button")
-                    + info_row("2. Open Reddit thread", f'<a href="{full_url}" target="_blank" style="color:var(--c-link)">reddit.com/r/{post.get("subreddit","")}</a>')
-                    + info_row("3. Paste & submit", "manually in Reddit")
-                    + info_row("4. Mark as posted", "use Mark as Posted button")
-                    + f'</div></div>',
-                    unsafe_allow_html=True,
-                )
-            else:
-                # No comment yet — generate inline
-                st.markdown(
-                    '<div style="text-align:center;padding:30px 20px">'
-                    '<div style="font-size:36px;margin-bottom:10px">💬</div>'
-                    '<div style="color:var(--c-t1);font-size:15px;font-weight:600;margin-bottom:6px">No comment generated yet</div>'
-                    '<div style="color:var(--c-t3);font-size:13px;margin-bottom:20px">Click below to generate a humanized comment with Claude now.</div>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-                if st.button("Generate Comment with Claude", type="primary", use_container_width=True, key=f"gen_inline_{sel_id}"):
-                    with st.spinner("Generating with Claude..."):
-                        try:
-                            new_sug = generate_comment_for_post(post)
-                            if new_sug:
-                                post_obj = RedditPost(
-                                    id=post.get("id",""), title=post.get("title",""),
-                                    selftext=post.get("selftext",""), url=post.get("permalink",""),
-                                    subreddit=post.get("subreddit",""), score=post.get("score",0),
-                                    num_comments=post.get("num_comments",0),
-                                    upvote_ratio=post.get("upvote_ratio",0.9),
-                                    created_utc=post.get("created_utc", time.time()),
-                                    permalink=post.get("permalink",""), author=post.get("author",""),
-                                    keyword=post.get("keyword", scraper_cfg.domain),
-                                )
-                                save_results([{"post": post_obj, "suggestion": new_sug}])
-                                st.success("Comment generated!")
-                                st.rerun()
-                            else:
-                                st.error("Claude returned no comment. Check your ANTHROPIC_API_KEY in .env")
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-
-            st.markdown('</div>', unsafe_allow_html=True)
+            if b5.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
+                post_for_regen = insight_map.get(pid, {
+                    "id": pid, "title": item["title"], "selftext": "",
+                    "permalink": item["permalink"], "subreddit": item["subreddit"],
+                    "score": item["score"], "num_comments": item["num_comments"],
+                    "upvote_ratio": 0.9, "created_utc": time.time(),
+                    "author": "", "keyword": item["keyword"],
+                })
+                with st.spinner("Regenerating..."):
+                    try:
+                        new_sug = generate_comment_for_post(post_for_regen)
+                        if new_sug:
+                            update_comment_by_post_id(pid, {
+                                "comment": new_sug.get("comment",""),
+                                "tone": new_sug.get("tone",""),
+                                "verification_status": "pending",
+                            })
+                            st.success("Regenerated!")
+                            st.rerun()
+                        else:
+                            st.error("Claude returned nothing — check ANTHROPIC_API_KEY in .env")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
 
 # =============================================================================
 # PAGE 6 — PUBLISHING TRACKER
