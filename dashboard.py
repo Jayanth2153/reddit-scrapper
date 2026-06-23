@@ -1888,11 +1888,7 @@ elif page == "Media Lab":
                             if _is_img:
                                 st.image(_msrc or _murl, use_container_width=True)
                                 if _murl:
-                                    st.markdown(
-                                        f'<a href="{_murl}" target="_blank" style="font-size:11px;color:#3b82f6">'
-                                        f'Open full image ↗</a>',
-                                        unsafe_allow_html=True,
-                                    )
+                                    st.link_button("Open full image ↗", _murl, use_container_width=True)
                             else:
                                 # prefer local file; fall back to CDN URL
                                 _vid_src = _msrc if (_mlocal and os.path.exists(_mlocal)) else (_murl or _msrc)
