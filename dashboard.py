@@ -797,8 +797,11 @@ elif page == "Post Discovery":
     )
 
     if run_discovery:
-        with st.spinner("Fetching fresh posts from Reddit with all keywords — takes ~2 min..."):
+        with st.spinner("Syncing keywords and fetching fresh posts from Reddit — takes ~2 min..."):
             try:
+                sync_keywords_to_file()
+                kd_active = [k for k in get_keywords_data() if k.get("status","active") == "active"]
+                st.caption(f"Using {len(kd_active)} active keywords from Keyword Monitor.")
                 result = subprocess.run(
                     ["python", "run_daily.py"],
                     cwd=str(Path.cwd()),
