@@ -1187,17 +1187,7 @@ elif page == "Content Studio":
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ── Tabs ─────────────────────────────────────────────────────────────────
-    _hist_all  = hf.credit_history()
-    _hist_imgs = [e for e in _hist_all if e.get("type","").lower() in ("image","text_to_image","img")]
-    _hist_vids = [e for e in _hist_all if e.get("type","").lower() in ("video","text_to_video","vid")]
-    _hist_posts_count = len(_hist_all)
-
-    tab_img, tab_vid, tab_ideas, tab_posts = st.tabs([
-        "Post Image",
-        "Post Video",
-        "Content Ideas",
-        f"Generated Posts ({_hist_posts_count})",
-    ])
+    tab_img, tab_vid, tab_ideas = st.tabs(["Post Image", "Post Video", "Content Ideas"])
 
     # =========================================================================
     # TAB 1 — POST IMAGE
