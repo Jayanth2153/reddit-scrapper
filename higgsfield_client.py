@@ -278,9 +278,21 @@ class HiggsFieldClient:
             data = json.loads(CREDITS_FILE.read_text(encoding="utf-8"))
             changed = False
             for entry in data:
+                # ensure every entry has a stable UUID
                 if not entry.get("request_id"):
                     entry["request_id"] = str(_uuid.uuid4())
                     changed = True
+                # strip stray trailing quotes/backslashes from URLs
+                url = entry.get("result_url", "") or ""
+                clean = url.rstrip('"\' \\')
+                if clean != url:
+                    entry["result_url"] = clean
+                    changed = True
+                # ensure required fields
+                for _k, _v in (("reddit_text", ""), ("posted", False), ("result", "")):
+                    if _k not in entry:
+                        entry[_k] = _v
+                        changed = True
             if changed:
                 CREDITS_FILE.write_text(
                     json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
