@@ -676,6 +676,8 @@ with st.sidebar:
     )
     st.markdown('<hr style="margin:0 0 8px;border-color:var(--c-b1)">', unsafe_allow_html=True)
 
+    if "_pre_sidebar_nav" in st.session_state:
+        st.session_state["sidebar_nav"] = st.session_state.pop("_pre_sidebar_nav")
     page = st.radio(
         "nav", NAV_ITEMS,
         label_visibility="collapsed",
