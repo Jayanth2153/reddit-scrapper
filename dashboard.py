@@ -940,6 +940,12 @@ elif page == "Comment Studio":
             tone     = item["tone"]
             full_url = item["permalink"] if item["permalink"].startswith("http") else f"https://reddit.com{item['permalink']}"
 
+            # Pre-compute snippets to avoid nested f-strings
+            tone_badge = (
+                f'<span style="background:#1e3050;color:#93c5fd;font-size:10px;font-weight:600;'
+                f'padding:2px 8px;border-radius:20px">{tone.title()}</span>'
+            ) if tone else ""
+
             # Status colors
             vst_color = "#10b981" if vst == "pass" else "#ef4444" if vst == "fail" else "#6b7280"
             vst_label = "PASS" if vst == "pass" else "FAIL" if vst == "fail" else "PENDING"
