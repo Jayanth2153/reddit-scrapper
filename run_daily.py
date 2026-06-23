@@ -16,7 +16,7 @@ from claude_client import ClaudeCommentGenerator
 import storage
 
 KEYWORDS_FILE = Path("keywords.txt")
-MAX_POSTS     = 80
+MAX_POSTS     = 10
 TOP_COMMENTS  = 5
 W = 70
 
