@@ -1671,7 +1671,7 @@ elif page == "Accounts Manager":
                     f'<div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">PASSWORD</div>'
                     f'<div style="color:var(--c-t1);font-size:14px;font-weight:700">{"••••••••" if _has_pwd else "—"}</div>'
                     f'</div>'
-                    f'{"<div><div style=\\"color:var(--c-t3);font-size:10px;margin-bottom:2px\\">EMAIL</div><div style=\\"color:var(--c-t2);font-size:13px\\">" + acc.get("email","") + "</div></div>" if acc.get("email") else ""}'
+                    f'{_email_block}'
                     f'</div>'
                     f'<div style="display:flex;gap:10px;flex-wrap:wrap">'
                     f'<a href="https://www.reddit.com/login" target="_blank" '
