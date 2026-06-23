@@ -419,6 +419,18 @@ APTORI_VID_PROMPTS = [
     "Time-lapse API traffic patterns morphing into security graphs, dark moody background, Aptori logo appears, tech commercial style",
 ]
 
+# ── Keyword sync helper ───────────────────────────────────────────────────────
+
+def sync_keywords_to_file():
+    """Write keywords.txt from all active entries in keywords_data.json so the
+    scraper always runs with the full, up-to-date keyword list."""
+    kd_all = get_keywords_data()
+    active = [k["keyword"] for k in kd_all if k.get("status", "active") == "active" and k.get("keyword", "").strip()]
+    if not active:
+        return
+    kw_file = Path("keywords.txt")
+    kw_file.write_text("\n".join(active), encoding="utf-8")
+
 # ── Comment generation helpers ────────────────────────────────────────────────
 
 def _make_rate_manager() -> RateLimitManager:
