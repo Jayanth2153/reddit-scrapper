@@ -409,6 +409,65 @@ APTORI_VID_PROMPTS = [
     "Time-lapse API traffic patterns morphing into security graphs, dark moody background, Aptori logo appears, tech commercial style",
 ]
 
+# ── Comment generation helpers ────────────────────────────────────────────────
+
+def _make_rate_manager() -> RateLimitManager:
+    return (
+        RateLimitManager()
+        .register("reddit",    requests_per_minute=6,  burst_size=1)
+        .register("anthropic", requests_per_minute=45, burst_size=5)
+    )
+
+def fetch_post_from_url(url: str) -> dict:
+    """Fetch a Reddit post via the public JSON API (no auth needed)."""
+    clean = url.strip().rstrip("/")
+    if "?" in clean:
+        clean = clean[:clean.index("?")]
+    if not clean.endswith(".json"):
+        clean += ".json"
+    resp = _requests.get(
+        clean,
+        headers={"User-Agent": "Mozilla/5.0 (compatible; AptoriBot/1.0)"},
+        timeout=12,
+    )
+    resp.raise_for_status()
+    listing = resp.json()
+    pd = listing[0]["data"]["children"][0]["data"]
+    permalink = f"https://www.reddit.com{pd['permalink']}"
+    return {
+        "id":           pd["id"],
+        "title":        pd.get("title", ""),
+        "selftext":     pd.get("selftext", ""),
+        "subreddit":    pd.get("subreddit", ""),
+        "score":        pd.get("score", 0),
+        "num_comments": pd.get("num_comments", 0),
+        "upvote_ratio": pd.get("upvote_ratio", 0.9),
+        "permalink":    permalink,
+        "author":       str(pd.get("author", "[unknown]")),
+        "created_utc":  pd.get("created_utc", time.time()),
+        "keyword":      "",
+    }
+
+def generate_comment_for_post(post_dict: dict) -> dict | None:
+    """Call Claude to generate a humanized comment for a post dict."""
+    post_obj = RedditPost(
+        id           = post_dict["id"],
+        title        = post_dict["title"],
+        selftext     = post_dict.get("selftext", ""),
+        url          = post_dict["permalink"],
+        subreddit    = post_dict["subreddit"],
+        score        = post_dict.get("score", 0),
+        num_comments = post_dict.get("num_comments", 0),
+        upvote_ratio = post_dict.get("upvote_ratio", 0.9),
+        created_utc  = post_dict.get("created_utc", time.time()),
+        permalink    = post_dict["permalink"],
+        author       = post_dict.get("author", "[unknown]"),
+        keyword      = post_dict.get("keyword", scraper_cfg.domain),
+    )
+    rm  = _make_rate_manager()
+    gen = ClaudeCommentGenerator(anthropic_cfg, rm)
+    return gen.generate_comment(post_obj, scraper_cfg.domain, scraper_cfg.your_expertise)
+
 # ── Data load ─────────────────────────────────────────────────────────────────
 data       = get_all()
 insights   = get_insights()
