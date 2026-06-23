@@ -140,7 +140,15 @@ def main() -> None:
     print(f"    Domain     : {DOMAIN}")
     print(f"    Subreddits : {', '.join(f'r/{s}' for s in SUBREDDITS)}")
     print(f"    Time filter: {TIME_FILTER}  ·  Sort: {SORT_BY}")
-    print(f"    Target posts: top {MAX_POSTS}\n")
+
+    # Enforce daily cap
+    already_today = get_today_commented_count()
+    remaining     = DAILY_LIMIT - already_today
+    if remaining <= 0:
+        print(f"\n⛔  Daily limit reached ({DAILY_LIMIT} posts already processed today). Try again tomorrow.")
+        return
+    posts_this_run = min(MAX_POSTS, remaining)
+    print(f"    Target posts: {posts_this_run}  (daily cap: {DAILY_LIMIT}, used today: {already_today})\n")
 
     # 1 — Rate limiter
     rate_manager = build_rate_manager()
@@ -156,7 +164,7 @@ def main() -> None:
         keywords     = KEYWORDS,
         min_score    = MIN_SCORE,
         min_comments = MIN_COMMENTS,
-        max_posts    = MAX_POSTS,
+        max_posts    = posts_this_run,
         time_filter  = TIME_FILTER,
         sort_by      = SORT_BY,
     )
