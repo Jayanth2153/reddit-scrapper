@@ -588,8 +588,11 @@ def generate_comment_for_post(post_dict: dict) -> dict | None:
 def generate_reddit_post_text(prompt: str, topic: str, media_type: str) -> str:
     """Call Claude to write a human-sounding Reddit post for a generated image or video."""
     import anthropic as _ant
+    api_key = getattr(anthropic_cfg, "api_key", None) or ""
+    if not api_key:
+        return "[Could not generate post text: Anthropic API key not configured — check Settings]"
     try:
-        client = _ant.Anthropic(api_key=anthropic_cfg.api_key)
+        client = _ant.Anthropic(api_key=api_key)
         system = (
             "You write Reddit posts as a real engineer who works in tech. "
             "Rules you never break:\n"
@@ -618,7 +621,8 @@ def generate_reddit_post_text(prompt: str, topic: str, media_type: str) -> str:
             system=system,
             messages=[{"role": "user", "content": user_msg}],
         )
-        return resp.content[0].text.strip()
+        text = resp.content[0].text.strip()
+        return text if text else "[Could not generate post text: empty response from Claude]"
     except Exception as e:
         return f"[Could not generate post text: {e}]"
 
