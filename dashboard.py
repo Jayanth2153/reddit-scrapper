@@ -1102,6 +1102,11 @@ elif page == "Comment Studio":
                     except Exception as e:
                         st.error(f"Error: {e}")
 
+            if b6.button("Remove", key=f"cs_remove_{pid}", use_container_width=True,
+                         help="Delete this comment — frees slot for a new post"):
+                delete_comment_by_post_id(pid)
+                st.rerun()
+
 # =============================================================================
 # PAGE 6 — CONTENT STUDIO (HIGGSFIELD)
 # =============================================================================
