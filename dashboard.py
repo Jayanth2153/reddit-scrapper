@@ -1972,12 +1972,10 @@ elif page == "Media Lab":
                             key=f"ml_acct_{_mrid}",
                             label_visibility="collapsed",
                         )
-                        st.markdown(
-                            f'<a href="https://www.reddit.com/user/{_sel}" target="_blank" '
-                            f'style="display:block;background:var(--c-row);color:var(--c-t2);'
-                            f'padding:6px 10px;border-radius:8px;font-size:12px;text-align:center;'
-                            f'text-decoration:none;margin-bottom:8px">u/{_sel} profile ↗</a>',
-                            unsafe_allow_html=True,
+                        st.link_button(
+                            f"u/{_sel} profile ↗",
+                            f"https://www.reddit.com/user/{_sel}",
+                            use_container_width=True,
                         )
                     else:
                         st.markdown(
