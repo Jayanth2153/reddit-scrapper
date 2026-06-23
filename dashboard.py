@@ -1674,55 +1674,6 @@ elif page == "Accounts Manager":
                 _plain_pwd = _b64.b64decode(_stored_pwd_b64).decode() if _stored_pwd_b64 else ""
                 _has_pwd = bool(_plain_pwd)
 
-                # ── Reddit login panel ────────────────────────────────────────
-                _email_block = (
-                    f'<div><div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">EMAIL</div>'
-                    f'<div style="color:var(--c-t2);font-size:13px">{acc.get("email","")}</div></div>'
-                ) if acc.get("email") else ""
-                st.markdown(
-                    f'<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:12px;'
-                    f'padding:16px 20px;margin-bottom:16px">'
-                    f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-                    f'letter-spacing:.1em;margin-bottom:12px">Reddit Login</div>'
-                    f'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">'
-                    f'<div>'
-                    f'<div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">USERNAME</div>'
-                    f'<div style="color:var(--c-t1);font-size:14px;font-weight:700">u/{uname}</div>'
-                    f'</div>'
-                    f'<div>'
-                    f'<div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">PASSWORD</div>'
-                    f'<div style="color:var(--c-t1);font-size:14px;font-weight:700">{"••••••••" if _has_pwd else "—"}</div>'
-                    f'</div>'
-                    f'{_email_block}'
-                    f'</div>'
-                    f'<div style="display:flex;gap:10px;flex-wrap:wrap">'
-                    f'<a href="https://www.reddit.com/login" target="_blank" '
-                    f'style="background:#FF4500;color:#fff;padding:8px 18px;border-radius:8px;'
-                    f'font-size:13px;font-weight:700;text-decoration:none">Open Reddit Login</a>'
-                    f'<a href="https://www.reddit.com/user/{uname}" target="_blank" '
-                    f'style="background:var(--c-b1);color:var(--c-link);padding:8px 16px;border-radius:8px;'
-                    f'font-size:13px;font-weight:600;text-decoration:none">View Profile</a>'
-                    f'<a href="https://www.reddit.com/submit" target="_blank" '
-                    f'style="background:var(--c-b1);color:var(--c-t2);padding:8px 16px;border-radius:8px;'
-                    f'font-size:13px;font-weight:600;text-decoration:none">Submit Post</a>'
-                    f'</div>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-
-                # Show credentials to copy (reveal password for login)
-                if _has_pwd:
-                    if st.button("Show credentials to copy", key=f"acc_show_{uname}"):
-                        st.session_state[f"show_creds_{uname}"] = True
-                    if st.session_state.get(f"show_creds_{uname}"):
-                        cr1, cr2 = st.columns(2)
-                        cr1.text_input("Username", value=uname, key=f"acc_cu_{uname}", disabled=True)
-                        cr2.text_input("Password", value=_plain_pwd, key=f"acc_cp_{uname}", type="default")
-                        st.caption("Copy these into the Reddit login form above. Click away to hide.")
-                        if st.button("Hide", key=f"acc_hide_{uname}"):
-                            st.session_state[f"show_creds_{uname}"] = False
-                            st.rerun()
-
                 # ── Stats ─────────────────────────────────────────────────────
                 ca, cb, cc, cd = st.columns(4)
                 ca.markdown(metric_card("Posts Made",    pm,      "", "#3b82f6"), unsafe_allow_html=True)
@@ -1731,6 +1682,22 @@ elif page == "Accounts Manager":
                 cd.markdown(metric_card("Last Used",     lu[:10], "", "#7c3aed"), unsafe_allow_html=True)
 
                 st.markdown("---")
+
+                # ── Quick links ───────────────────────────────────────────────
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">'
+                    f'<a href="https://www.reddit.com/user/{uname}" target="_blank" '
+                    f'style="background:#FF4500;color:#fff;padding:6px 14px;border-radius:7px;'
+                    f'font-size:12px;font-weight:700;text-decoration:none">u/{uname} on Reddit</a>'
+                    f'<a href="https://www.reddit.com/submit" target="_blank" '
+                    f'style="background:var(--c-b1);color:var(--c-t2);padding:6px 14px;border-radius:7px;'
+                    f'font-size:12px;font-weight:600;text-decoration:none">Submit Post</a>'
+                    f'{"<span style=\'color:var(--c-t3);font-size:11px\'>• Password saved</span>" if _has_pwd else ""}'
+                    f'{"<span style=\'color:var(--c-t3);font-size:11px\''>• " + acc.get("email","") + "</span>" if acc.get("email") else ""}'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
                 st.markdown(f'**Tone:** {acc.get("tone","")}')
                 st.markdown(f'**Posting rules:** {acc.get("rules","")}')
                 if acc.get("notes"):
