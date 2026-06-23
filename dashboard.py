@@ -123,19 +123,54 @@ st.markdown(f"""
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span {{ color: var(--c-t1b); }}
 [data-testid="stSidebar"] .stCaption {{ color: var(--c-t3) !important; }}
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
-    display: block;
-    padding: 9px 14px !important;
+/* ── Sidebar nav: modern toggle style ── */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] {{
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 0 6px;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label {{
+    display: flex !important;
+    align-items: center !important;
+    padding: 9px 12px 9px 14px !important;
     border-radius: 8px !important;
     font-size: 13px !important;
+    font-weight: 500 !important;
     color: var(--c-t2) !important;
-    transition: background .12s, color .12s;
-    cursor: pointer;
-    margin-bottom: 2px;
+    cursor: pointer !important;
+    margin: 0 !important;
+    border-left: 3px solid transparent !important;
+    transition: background .15s, color .15s, border-color .15s !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }}
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
+/* hide the radio dot */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {{
+    display: none !important;
+}}
+/* label text fills remaining space */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:last-child {{
+    flex: 1 !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:last-child p {{
+    font-size: 13px !important;
+    font-weight: inherit !important;
+    margin: 0 !important;
+    color: inherit !important;
+}}
+/* active / selected */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {{
+    background: rgba(230,57,70,.10) !important;
+    border-left: 3px solid #E63946 !important;
+    color: #E63946 !important;
+    font-weight: 600 !important;
+}}
+/* hover */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:not(:has(input:checked)):hover {{
     background: var(--c-b1) !important;
     color: var(--c-t1) !important;
+    border-left: 3px solid var(--c-b2) !important;
 }}
 
 /* ── Inputs & selects ── */
