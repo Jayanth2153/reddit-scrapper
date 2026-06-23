@@ -1805,19 +1805,21 @@ elif page == "Accounts Manager":
                 f'</div>'
 
                 # Stats row
-                f'<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px">'
+                f'<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:{"12px" if acc.get("notes") else "6px"}">'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Karma</div>'
+                f'<div style="color:#FF4500;font-size:18px;font-weight:800">{acc.get("karma", "—"):,}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Account Age</div>'
+                f'<div style="color:var(--c-t1);font-size:13px;font-weight:600;margin-top:4px">{acc.get("account_age","—")}</div></div>'
                 f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Posts Made</div>'
                 f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{pm}</div></div>'
                 f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Verified Pass</div>'
                 f'<div style="color:#10b981;font-size:18px;font-weight:800">{vp}</div></div>'
                 f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Last Used</div>'
                 f'<div style="color:var(--c-t1);font-size:13px;font-weight:600;margin-top:4px">{lu}</div></div>'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Password</div>'
-                f'<div style="color:var(--c-t3);font-size:13px;margin-top:4px">{"Saved" if _has_pwd else "Not set"}</div></div>'
                 f'</div>'
 
                 # Notes
-                + (f'<div style="color:var(--c-t3);font-size:12px;margin-bottom:12px">{acc.get("notes","")}</div>'
+                + (f'<div style="color:var(--c-t3);font-size:12px;margin-bottom:10px">{acc.get("notes","")}</div>'
                    if acc.get("notes") else "")
 
                 + f'</div>',
