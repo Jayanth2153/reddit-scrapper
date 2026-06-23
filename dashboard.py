@@ -1701,76 +1701,27 @@ elif page == "Content Studio":
 # PAGE 8 — HIGGSFIELD CREDITS
 # =============================================================================
 elif page == "Media Lab":
-    st.markdown(section_header("Media Lab", "Track credit usage across all AI generations"), unsafe_allow_html=True)
+    st.markdown(section_header("Media Lab", "Higgsfield credit usage — generated posts are in Content Studio"), unsafe_allow_html=True)
+
+    _ml_hist = hf.credit_history()
+    _ml_imgs = len([e for e in _ml_hist if e.get("type","").lower() in ("image","text_to_image","img")])
+    _ml_vids = len([e for e in _ml_hist if e.get("type","").lower() in ("video","text_to_video","vid")])
+    _ml_posted = len([e for e in _ml_hist if e.get("posted", False)])
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.markdown(metric_card("Credits Available",   hf_credits or "—",              "from your plan",    "#10b981"), unsafe_allow_html=True)
-    c2.markdown(metric_card("Used This Session",   hf.credits_used_total(),        "",                  "#E63946"), unsafe_allow_html=True)
-    c3.markdown(metric_card("Used Today",          hf.credits_used_today(),        "",                  "#f59e0b"), unsafe_allow_html=True)
-    c4.markdown(metric_card("Generations Logged",  len(hf.credit_history()),       "",                  "#7c3aed"), unsafe_allow_html=True)
+    c1.markdown(metric_card("Credits Available",  hf_credits or "—",         "from your plan",     "#10b981"), unsafe_allow_html=True)
+    c2.markdown(metric_card("Used Today",         hf.credits_used_today(),   "resets midnight",    "#f59e0b"), unsafe_allow_html=True)
+    c3.markdown(metric_card("Images Generated",   _ml_imgs,                  "all time",           "#3b82f6"), unsafe_allow_html=True)
+    c4.markdown(metric_card("Videos Generated",   _ml_vids,                  "all time",           "#7c3aed"), unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown('<div style="color:var(--c-t1);font-weight:700;font-size:18px;margin-bottom:12px">Download History</div>', unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    history = hf.credit_history()
-    if not history:
-        st.info("No generations logged yet. Use Content Studio to generate images or videos.")
-    else:
-        img_history = [e for e in history if e.get("type","").lower() in ("image","text_to_image","img")]
-        vid_history = [e for e in history if e.get("type","").lower() in ("video","text_to_video","vid")]
-        other_history = [e for e in history if e not in img_history and e not in vid_history]
+    _ml2a, _ml2b = st.columns(2)
+    _ml2a.markdown(metric_card("Posted to Reddit", _ml_posted,               "marked as posted",   "#10b981"), unsafe_allow_html=True)
+    _ml2b.markdown(metric_card("Pending Posting",  len(_ml_hist) - _ml_posted, "ready to post",   "#E63946"), unsafe_allow_html=True)
 
-        tab_img_h, tab_vid_h = st.tabs([
-            f"Images ({len(img_history)})",
-            f"Videos ({len(vid_history) + len(other_history)})",
-        ])
-
-        def _render_history_table(entries):
-            if not entries:
-                st.caption("Nothing here yet.")
-                return
-            st.markdown(
-                '<div style="display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1fr 2fr;'
-                'background:var(--c-card);border:1px solid var(--c-b2);border-radius:10px 10px 0 0;padding:10px 14px">'
-                + "".join(f'<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em">{h}</div>'
-                          for h in ["Date", "Model", "Credits", "Status", "Prompt"])
-                + '</div>',
-                unsafe_allow_html=True,
-            )
-            for entry in entries:
-                created = entry.get("created_at","")[:16].replace("T"," ")
-                model   = entry.get("model","?").split("/")[-1]
-                creds   = entry.get("credits", 0)
-                status_ = entry.get("status","?")
-                prompt  = entry.get("prompt","")[:55]
-                url     = entry.get("result_url","")
-                s_color = "#10b981" if status_ == "completed" else "#f59e0b"
-                st.markdown(
-                    f'<div style="display:grid;grid-template-columns:1.4fr 1.2fr 1fr 1fr 2fr;'
-                    f'background:var(--c-row);border:1px solid var(--c-b1);border-top:none;padding:10px 14px">'
-                    f'<div style="color:var(--c-t2);font-size:12px">{created}</div>'
-                    f'<div style="color:var(--c-t1);font-size:12px">{model}</div>'
-                    f'<div style="color:#f59e0b;font-size:13px;font-weight:700">{creds}</div>'
-                    f'<div style="color:{s_color};font-size:12px">{status_.title()}</div>'
-                    f'<div style="color:var(--c-t2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
-                    f'{prompt}{"…" if len(entry.get("prompt","")) > 55 else ""}</div>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-                if url:
-                    dl_col, _ = st.columns([1, 5])
-                    dl_col.markdown(
-                        f'<div style="background:var(--c-bg);border:1px solid var(--c-b1);border-top:none;padding:6px 14px">'
-                        f'<a href="{url}" target="_blank" style="color:var(--c-link);font-size:11px;font-weight:600">Download / View</a>'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
-
-        with tab_img_h:
-            _render_history_table(img_history)
-
-        with tab_vid_h:
-            _render_history_table(vid_history + other_history)
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.info("To view, copy, and manage your generated posts — go to **Content Studio → Generated Posts** tab.")
 
 # =============================================================================
 # PAGE 9 — ACCOUNTS MANAGER
