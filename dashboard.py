@@ -1986,12 +1986,13 @@ elif page == "Media Lab":
                             'Add accounts in Account Roster</div>',
                             unsafe_allow_html=True,
                         )
+                    st.link_button(
+                        "Open Reddit to Post ↗",
+                        "https://www.reddit.com/submit",
+                        use_container_width=True,
+                    )
                     st.markdown(
-                        '<a href="https://www.reddit.com/submit" target="_blank" '
-                        'style="display:block;background:#FF4500;color:#fff;padding:10px 12px;'
-                        'border-radius:9px;font-size:13px;font-weight:700;text-align:center;'
-                        'text-decoration:none;margin-bottom:6px">Open Reddit to Post ↗</a>'
-                        '<div style="color:var(--c-t3);font-size:10px;text-align:center;line-height:1.5">'
+                        '<div style="color:var(--c-t3);font-size:10px;text-align:center;line-height:1.5;margin-top:4px">'
                         'Copy the text from the middle column, then paste it when Reddit opens.</div>',
                         unsafe_allow_html=True,
                     )
