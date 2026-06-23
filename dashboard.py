@@ -614,11 +614,42 @@ if page == "Dashboard":
     )
 
     # Today's recommended threads
-    st.markdown('<h3 style="color:var(--c-t1);font-weight:700;margin-bottom:12px">Today\'s Recommended Threads</h3>', unsafe_allow_html=True)
+    th1, th2, th3 = st.columns([3, 2, 2])
+    th1.markdown('<h3 style="color:var(--c-t1);font-weight:700;margin:0">Today\'s Recommended Threads</h3>', unsafe_allow_html=True)
+    dash_timeline = th2.selectbox(
+        "Timeline", ["Last 24 hours", "Last 6 hours", "Last 3 days", "All time"],
+        index=0, key="dash_timeline", label_visibility="collapsed",
+    )
+    dash_fetch = th3.button("Fetch New Posts", key="dash_fetch", use_container_width=True)
+    if dash_fetch:
+        with st.spinner("Fetching fresh posts..."):
+            try:
+                r = subprocess.run(["python", "run_daily.py"], cwd=str(Path.cwd()),
+                                   capture_output=True, text=True, timeout=300)
+                if r.returncode == 0:
+                    st.success("Done!")
+                    st.rerun()
+                else:
+                    st.error(f"Scraper error:\n{r.stderr[-400:]}")
+            except Exception as e:
+                st.error(str(e))
 
-    top_posts = sorted(insights, key=intent_score, reverse=True)[:6]
+    dash_age_map = {"Last 6 hours": 6, "Last 24 hours": 24, "Last 3 days": 72, "All time": 99999}
+    dash_max_h = dash_age_map.get(dash_timeline, 24)
+    _now = datetime.utcnow()
+    def _dash_age(p):
+        try:
+            return (_now - datetime.fromisoformat(p.get("scraped_at","").rstrip("Z"))).total_seconds()/3600
+        except Exception:
+            return 99999
+    top_posts = sorted(
+        [p for p in insights if _dash_age(p) <= dash_max_h],
+        key=intent_score, reverse=True
+    )[:6]
+
+    st.markdown("<br>", unsafe_allow_html=True)
     if not top_posts:
-        st.info("Run `python run_daily.py` to discover posts.")
+        st.info("No posts in this time window — click **Fetch New Posts** or widen the timeline.")
     else:
         for i in range(0, len(top_posts), 2):
             cols = st.columns(2)
