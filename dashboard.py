@@ -1792,7 +1792,8 @@ elif page == "Settings":
             new_lines   = [l.strip() for l in edited_kw.splitlines() if l.strip() and not l.startswith("#")]
             new_kd      = [existing_kd.get(kw, {"keyword":kw,"status":"active","posts_found":0,"quality_score":0,"last_scan":""}) for kw in new_lines]
             save_keywords_data(new_kd)
-            st.success("Keywords saved.")
+            sync_keywords_to_file()
+            st.success("Keywords saved and synced to scraper.")
 
     with tab_creds:
         st.markdown("**Higgsfield CLI auth status**")
