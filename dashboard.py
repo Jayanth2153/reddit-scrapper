@@ -1845,16 +1845,12 @@ elif page == "Media Lab":
                         unsafe_allow_html=True,
                     )
                     if _murl:
-                        _url_disp = (_murl[:44] + "…") if len(_murl) > 44 else _murl
                         st.markdown(
                             f'<a href="{_murl}" target="_blank" '
-                            f'style="display:flex;align-items:center;gap:6px;color:#3b82f6;font-size:11px;'
-                            f'text-decoration:none;background:var(--c-row);border:1px solid var(--c-b1);'
-                            f'border-radius:8px;padding:7px 10px;margin-bottom:8px;overflow:hidden">'
-                            f'<span style="flex-shrink:0">📎</span>'
-                            f'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'
-                            f'{_url_disp}</span>'
-                            f'<span style="flex-shrink:0">↗</span></a>',
+                            f'style="display:inline-flex;align-items:center;gap:5px;color:#3b82f6;'
+                            f'font-size:11px;font-weight:600;text-decoration:none;'
+                            f'padding:4px 0;margin-bottom:8px;white-space:nowrap">'
+                            f'📎 View file ↗</a>',
                             unsafe_allow_html=True,
                         )
                         with st.expander("Preview"):
