@@ -1063,17 +1063,23 @@ elif page == "Post Discovery":
         if sel_kw_pd != "All keywords":
             fresh = [p for p in fresh if p.get("keyword") == sel_kw_pd]
 
-    # ── Keyword coverage badges ───────────────────────────────────────────────
-    if fresh:
-        kw_counts: dict = {}
-        for p in fresh:
-            k = p.get("keyword", "—")
-            kw_counts[k] = kw_counts.get(k, 0) + 1
+    # ── Keyword coverage badges — all monitor keywords ───────────────────────
+    _kw_counts: dict = {
+        k["keyword"]: 0
+        for k in get_keywords_data()
+        if k.get("keyword", "").strip() and k.get("status", "active") == "active"
+    }
+    for _p in fresh:
+        _k = _p.get("keyword", "")
+        if _k:
+            _kw_counts[_k] = _kw_counts.get(_k, 0) + 1
+    if _kw_counts:
         badges_html = " ".join(
-            f'<span style="background:var(--c-b1);color:var(--c-link);font-size:11px;'
+            f'<span style="background:{"var(--c-b1)" if n == 0 else "var(--c-link)22"};'
+            f'color:{"var(--c-t3)" if n == 0 else "var(--c-link)"};font-size:11px;'
             f'font-weight:600;padding:3px 10px;border-radius:20px">'
-            f'{kw} <span style="color:var(--c-t3)">({n})</span></span>'
-            for kw, n in sorted(kw_counts.items(), key=lambda x: -x[1])
+            f'{kw} <span style="opacity:0.7">({n})</span></span>'
+            for kw, n in sorted(_kw_counts.items(), key=lambda x: (-x[1], x[0]))
         )
         st.markdown(
             f'<div style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px">{badges_html}</div>',
