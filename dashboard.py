@@ -1302,26 +1302,25 @@ elif page == "Comment Studio":
                 type="primary",
             )
 
-            if b3.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
-                update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
-                st.success("Marked as posted!")
-                st.rerun()
-
-            if b3.button("Pass", key=f"cs_pass_{pid}", use_container_width=True):
+            if b4.button("Pass", key=f"cs_pass_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {
                     "verification_status": "pass",
                     "verified_at": datetime.utcnow().isoformat(),
                 })
                 st.rerun()
 
-            if b4.button("Fail", key=f"cs_fail_{pid}", use_container_width=True):
+            if b5.button("Fail", key=f"cs_fail_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {
                     "verification_status": "fail",
                     "verified_at": datetime.utcnow().isoformat(),
                 })
                 st.rerun()
 
-            if b5.button("Regenerate Comment", key=f"cs_regen_{pid}", use_container_width=True):
+            if b3.button("Mark Posted", key=f"cs_post_{pid}", use_container_width=True):
+                update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
+                st.rerun()
+
+            if b6.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
                 post_for_regen = insight_map.get(pid, {
                     "id": pid, "title": item["title"], "selftext": "",
                     "permalink": item["permalink"], "subreddit": item["subreddit"],
