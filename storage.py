@@ -269,6 +269,21 @@ def init_keywords_data() -> list:
     return data
 
 
+# ── Scraped ID registry (prevent re-scraping same posts) ─────────────────────
+
+def get_scraped_ids() -> set:
+    if not os.path.exists(SCRAPED_ID_FILE):
+        return set()
+    with open(SCRAPED_ID_FILE, "r", encoding="utf-8") as f:
+        return set(json.load(f))
+
+def mark_scraped_ids(ids):
+    existing = get_scraped_ids()
+    existing.update(ids)
+    with open(SCRAPED_ID_FILE, "w", encoding="utf-8") as f:
+        json.dump(list(existing), f)
+
+
 # ── Comment extended fields ───────────────────────────────────────────────────
 
 def update_comment_by_post_id(post_id: str, updates: dict):
