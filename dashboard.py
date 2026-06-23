@@ -892,7 +892,6 @@ elif page == "Comment Studio":
 
     # ── Load data ─────────────────────────────────────────────────────────────
     data_cs      = get_all()
-    tracker_cs   = get_publishing_tracker()
     insight_map  = {p.get("id",""): p for p in insights}
 
     # Build unified post list: comments are the source of truth
