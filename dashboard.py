@@ -1680,8 +1680,10 @@ elif page == "Content Studio":
                 with st.spinner(f"Generating with {_vmeta.get('name','model')} — {_vmeta.get('speed','~2min')}…"):
                     res = hf.generate_video(prompt=vid_prompt, model=vid_id, duration=duration, aspect_ratio=vid_ar, image_path=img_path.strip() if img_path else "", topic=vid_topic)
                 if "error" in res:
+                    st.toast(f"Video generation failed: {res['error']}", icon="❌")
                     st.error(res["error"])
                 else:
+                    st.toast(f"Video generated — {res['credits']} credits used. Check Media Lab!", icon="🎬")
                     st.success(f"Video generated — {res['credits']} credits used.")
                     with st.spinner("Writing Reddit post text…"):
                         _vreddit_text = generate_reddit_post_text(vid_prompt, vid_topic, "video")
