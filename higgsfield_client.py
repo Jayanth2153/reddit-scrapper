@@ -26,12 +26,15 @@ CREDITS_FILE = Path("higgsfield_credits.json")
 MEDIA_DIR    = Path("media_lab_files")
 
 
-def _download_media(url: str, dest: str) -> bool:
+def _download_media(url: str, dest: str, timeout: int = 30) -> bool:
     """Download a media file from url to dest. Returns True on success."""
     try:
         import urllib.request
         MEDIA_DIR.mkdir(exist_ok=True)
-        urllib.request.urlretrieve(url, dest)
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = resp.read()
+        Path(dest).write_bytes(data)
         return Path(dest).exists() and Path(dest).stat().st_size > 0
     except Exception:
         return False
