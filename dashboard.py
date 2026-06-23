@@ -677,7 +677,7 @@ with st.sidebar:
     st.markdown('<hr style="margin:0 0 8px;border-color:var(--c-b1)">', unsafe_allow_html=True)
 
     if "_pre_sidebar_nav" in st.session_state:
-        st.session_state["sidebar_nav"] = st.session_state.pop("_pre_sidebar_nav")
+        st.session_state["_pre_sidebar_nav"] = st.session_state.pop("_pre_sidebar_nav")
     page = st.radio(
         "nav", NAV_ITEMS,
         label_visibility="collapsed",
@@ -895,7 +895,7 @@ if page == "Dashboard":
                     if c_a.button("Open Reddit", key=f"dash_open_{i+j}", use_container_width=True):
                         st.markdown(f'<script>window.open("{p.get("permalink","#")}")</script>', unsafe_allow_html=True)
                     if c_b.button("Comment Studio", key=f"dash_studio_{i+j}", use_container_width=True):
-                        st.session_state["sidebar_nav"] = "Comment Studio"
+                        st.session_state["_pre_sidebar_nav"] = "Comment Studio"
                         st.session_state["studio_post_id"] = p.get("id", "")
                         st.rerun()
 
@@ -1123,7 +1123,7 @@ elif page == "Post Discovery":
                 unsafe_allow_html=True,
             )
             if ba2.button("Send to Comment Studio", key=f"pd_studio_{pid}", use_container_width=False):
-                st.session_state["sidebar_nav"] = "Comment Studio"
+                st.session_state["_pre_sidebar_nav"] = "Comment Studio"
                 st.session_state["studio_post_id"] = pid
                 st.rerun()
             st.markdown('<hr style="border-color:var(--c-b1);margin:4px 0 8px">', unsafe_allow_html=True)
@@ -1737,11 +1737,11 @@ elif page == "Content Studio":
                     _ic1, _ic2 = st.columns(2)
                     if _ic1.button("Use as Image Prompt", key=f"idea_img_{p.get('id','')}"):
                         st.session_state["_pre_cs_img_prompt"] = _sug_img
-                        st.session_state["sidebar_nav"]        = "Content Studio"
+                        st.session_state["_pre_sidebar_nav"]        = "Content Studio"
                         st.rerun()
                     if _ic2.button("Use as Video Prompt", key=f"idea_vid_{p.get('id','')}"):
                         st.session_state["_pre_cs_vid_prompt"] = _sug_vid
-                        st.session_state["sidebar_nav"]        = "Content Studio"
+                        st.session_state["_pre_sidebar_nav"]        = "Content Studio"
                         st.rerun()
 
 # =============================================================================
