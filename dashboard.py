@@ -1284,7 +1284,7 @@ elif page == "Comment Studio":
             )
 
             # ── Action buttons ──
-            b1, b2, b3, b4, b5, b6, b7 = st.columns([2, 2, 2, 1, 1, 2, 1])
+            b1, b2, b3, b4, b5, b6, b7 = st.columns(7)
 
             if b1.button("Copy Comment", key=f"cs_copy_{pid}", type="primary", use_container_width=True):
                 update_comment_by_post_id(pid, {"comment_status": "copied"})
