@@ -39,7 +39,7 @@ OUTPUT_FMT   = scraper_cfg.output_format    # json | csv | both
 def build_rate_manager() -> RateLimitManager:
     return (
         RateLimitManager()
-        .register("reddit",    requests_per_minute=55, burst_size=8)
+        .register("reddit",    requests_per_minute=6, burst_size=1)
         .register("anthropic", requests_per_minute=45, burst_size=5)
     )
 

@@ -85,8 +85,8 @@ def exponential_backoff(max_retries: int = 5, base_delay: float = 1.0,
                     if attempt == max_retries - 1:
                         raise
                     delay = min(base_delay * (2 ** attempt) + random.uniform(0, 1), max_delay)
-                    print(f"  ↻ Attempt {attempt + 1} failed ({type(exc).__name__}: {exc}). "
-                          f"Retrying in {delay:.1f}s …")
+                    print(f"  [RETRY] Attempt {attempt + 1} failed ({type(exc).__name__}: {exc}). "
+                          f"Retrying in {delay:.1f}s ...")
                     time.sleep(delay)
         return wrapper
     return decorator

@@ -1,0 +1,261 @@
+[
+  {
+    "keyword": "API security testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "REST API vulnerabilities",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "GraphQL security",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "OWASP API security top 10",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "API authorization testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "BOLA broken object level authorization",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "IDOR insecure direct object reference",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "API penetration testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "API fuzzing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "static application security testing SAST",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "software composition analysis SCA",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "application security posture management",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "open source dependency vulnerabilities",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "vulnerability remediation automation",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "AI generated code security",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "secure code review",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "DevSecOps CI CD pipeline",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "shift left security testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "security in software development lifecycle SDLC",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "automated security scanning",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "developer security tools",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "autonomous penetration testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "continuous pen testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "exploit proof of concept",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "attack surface management",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "Kubernetes security configuration",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "infrastructure as code security IaC",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "cloud misconfiguration detection",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "secrets detection source code",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "AI security threats",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "LLM application security",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "securing AI agents",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "AI code vulnerability",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "PCI DSS 4.0 compliance automation",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "HIPAA security testing",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "NIS2 compliance",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  },
+  {
+    "keyword": "SOC2 vulnerability management",
+    "status": "active",
+    "posts_found": 0,
+    "quality_score": 0,
+    "last_scan": ""
+  }
+]

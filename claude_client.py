@@ -1,8 +1,6 @@
 """
-claude_client.py — Generate contextual, authentic Reddit comments via Claude.
-
-Each comment is analysed for strategy, tone, and estimated engagement before
-being returned. Claude is instructed to be genuinely helpful — not promotional.
+claude_client.py — Generate humanized Reddit comments via Claude.
+Uses real human comments from the post as style anchors to sound natural.
 """
 
 import json
@@ -14,73 +12,66 @@ from rate_limiter import RateLimitManager, exponential_backoff
 from reddit_client import RedditPost
 
 
-# ------------------------------------------------------------------ #
-# System prompt
-# ------------------------------------------------------------------ #
+SYSTEM_PROMPT = """You are a real person on Reddit who works in application security. You have hands-on experience with API security testing, DevSecOps, and vulnerability management. You comment like a normal engineer, not like a marketer or AI assistant.
 
-SYSTEM_PROMPT = """You are an expert community-engagement strategist who helps
-professionals build authentic presence on Reddit.
+HARD RULES — breaking any makes the comment unusable:
+1. NO bullet points, numbered lists, or dashes — flowing prose only.
+2. NO em-dashes as structural dividers. Use commas or short sentences instead.
+3. NO bold, no headers, no formatting of any kind.
+4. Use contractions naturally: don't, it's, I've, you'd, that's, isn't, didn't.
+5. React to something SPECIFIC in the post — a number, a claim, a problem. Never open generically.
+6. NEVER start with: "Great post", "This is interesting", "Totally agree", "Fascinating", "Excellent".
+7. Use "I" — "I ran into this at work", "when we tested X...", "in my experience..."
+8. 2-3 sentences MAX. Shorter is better. Reddit readers scroll fast.
+9. ONE casual hedge is fine: "could be wrong but", "might depend on your stack", "at least in our env"
+10. End naturally — no CTA, no summary, no "hope this helps".
+11. Match the vocabulary of the subreddit — r/devops tone differs from r/netsec.
+12. Only mention Aptori if it fits organically (max 1 in 10 comments). Never force it.
 
-Your job: craft a single, value-adding comment for the given post that helps
-the OP or the wider community — and naturally positions the commenter as a
-thoughtful expert in their domain.
+If human example comments are provided, study their LENGTH, TONE, and VOCABULARY — then write something similar but original.
 
-Rules:
-1. Add real value (insight, resource, lived experience, nuanced take).
-2. Match the subreddit's tone — formal in r/MachineLearning, casual in r/Python.
-3. Keep it concise and punchy. Reddit readers scroll fast.
-4. Include a soft call-to-connect only when it fits naturally
-   (e.g. "Happy to dig into this more if useful" — never salesy).
-5. NEVER start with "Great post!" or any hollow opener.
-6. NEVER be promotional or mention products/services.
-7. Do not exceed 3 short paragraphs.
-
-Return ONLY a JSON object (no markdown fences, no preamble):
+Return ONLY a JSON object (no markdown fences, no extra text):
 {
-  "comment":              "<the comment text — plain Reddit markdown>",
-  "strategy":             "<one sentence: what engagement lever you used>",
-  "tone":                 "technical | casual | professional | empathetic",
-  "estimated_engagement": "low | medium | high",
-  "best_time_to_post":    "<timing tip, e.g. 'post within 2 h of the OP for max visibility'>"
+  "comment": "<2-3 sentence comment, plain prose, sounds like a real engineer typing fast>",
+  "tone": "casual | technical | conversational | empathetic"
 }"""
 
-
-# ------------------------------------------------------------------ #
-# Generator
-# ------------------------------------------------------------------ #
 
 class ClaudeCommentGenerator:
 
     def __init__(self, cfg, rate_manager: RateLimitManager):
-        self._cfg  = cfg
-        self._rl   = rate_manager
-        self._ant  = ant.Anthropic(api_key=cfg.anthropic.api_key)
-
-    # ---------------------------------------------------------------- #
-    # Internal
-    # ---------------------------------------------------------------- #
+        self._cfg = cfg
+        self._rl  = rate_manager
+        self._ant = ant.Anthropic(api_key=cfg.api_key)
 
     def _build_prompt(self, post: RedditPost, domain: str, expertise: str) -> str:
-        comments_block = ""
-        if post.top_comments:
-            snippets = "\n".join(f"  • {c[:300]}" for c in post.top_comments)
-            comments_block = f"\nTop comments so far:\n{snippets}"
+        # Use real human comments from the post as style anchors
+        human_cmts = getattr(post, "top_comments_human", None) or []
+        human_block = ""
+        if human_cmts:
+            snippets = "\n".join(
+                f'  u/{c["author"]}: "{c["body"][:220]}"'
+                for c in human_cmts[:3]
+            )
+            human_block = (
+                f"\nReal human comments already on this post "
+                f"(study their tone, length, and vocabulary — DO NOT copy them directly):\n"
+                f"{snippets}\n"
+            )
 
-        return f"""Domain / niche:  {domain}
-My expertise:    {expertise}
+        return f"""Domain:    {domain}
+Expertise: {expertise}
+Keyword:   {post.keyword or domain}
 
 Reddit post
 -----------
-Subreddit:   r/{post.subreddit}
-Title:       {post.title}
-Body:        {post.selftext[:900] or '(link post – no body text)'}
-Score:       {post.score} upvotes  |  {post.num_comments} comments  |  \
-{post.upvote_ratio * 100:.0f}% upvoted
-Flair:       {post.flair or 'none'}
-Age:         {post.age_hours():.1f} h old
-{comments_block}
-
-Write the comment now. Return ONLY the JSON object — no extra text."""
+Subreddit: r/{post.subreddit}
+Title:     {post.title}
+Body:      {post.selftext[:800] or '(link post)'}
+Score:     {post.score} upvotes  |  {post.num_comments} comments  |  {post.upvote_ratio*100:.0f}% upvoted
+Age:       {post.age_hours():.1f}h old
+{human_block}
+Write the comment now. Return ONLY the JSON."""
 
     @exponential_backoff(max_retries=4, base_delay=2.0,
                          exceptions=(ant.APIStatusError, ant.APIConnectionError,
@@ -88,49 +79,34 @@ Write the comment now. Return ONLY the JSON object — no extra text."""
     def _call_api(self, prompt: str) -> dict:
         self._rl.wait("anthropic")
         msg = self._ant.messages.create(
-            model      = self._cfg.anthropic.model,
-            max_tokens = self._cfg.anthropic.max_tokens,
+            model      = self._cfg.model,
+            max_tokens = self._cfg.max_tokens,
             system     = SYSTEM_PROMPT,
             messages   = [{"role": "user", "content": prompt}],
         )
         raw = msg.content[0].text.strip()
-        # Strip accidental markdown fences
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
                 raw = raw[4:]
         return json.loads(raw.strip())
 
-    # ---------------------------------------------------------------- #
-    # Public API
-    # ---------------------------------------------------------------- #
-
-    def generate_comment(
-        self,
-        post: RedditPost,
-        domain: str,
-        expertise: str = "",
-    ) -> Optional[dict]:
-        """Generate one comment suggestion for a post. Returns None on failure."""
+    def generate_comment(self, post: RedditPost, domain: str,
+                         expertise: str = "") -> Optional[dict]:
         try:
             return self._call_api(self._build_prompt(post, domain, expertise))
         except Exception as e:
-            print(f"      ❌  Comment generation failed: {e}")
+            print(f"      [ERR]  Comment generation failed: {e}")
             return None
 
-    def generate_batch(
-        self,
-        posts: List[RedditPost],
-        domain: str,
-        expertise: str = "",
-    ) -> List[dict]:
-        """
-        Generate comments for every post in the list.
-        Returns a list of dicts: {post: RedditPost, suggestion: dict | None}.
-        """
+    def generate_batch(self, posts: List[RedditPost], domain: str,
+                       expertise: str = "") -> List[dict]:
         results = []
         for i, post in enumerate(posts, 1):
-            print(f"\n  🤖  [{i}/{len(posts)}] \"{post.title[:60]}…\"")
+            human_count = len(getattr(post, "top_comments_human", []))
+            print(f"\n  [AI]  [{i}/{len(posts)}] \"{post.title[:58]}...\"")
+            if human_count:
+                print(f"         Using {human_count} human comments as style reference")
             suggestion = self.generate_comment(post, domain, expertise)
             results.append({"post": post, "suggestion": suggestion})
         return results

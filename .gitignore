@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Streamlit runtime
+streamlit_out.txt
+streamlit_err.txt
+
+# Debug screenshots
+*.png
+
+# Large data/session files (regenerated on run)
+dashboard_data.json
+insights_data.json
+higgsfield_credits.json
+history.json
+reddit_engagement_*.json

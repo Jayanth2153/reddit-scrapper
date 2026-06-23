@@ -13,11 +13,7 @@ load_dotenv()
 
 @dataclass
 class RedditConfig:
-    client_id: str     = os.getenv("REDDIT_CLIENT_ID", "")
-    client_secret: str = os.getenv("REDDIT_CLIENT_SECRET", "")
-    user_agent: str    = os.getenv("REDDIT_USER_AGENT", "RedditEngagementBot/1.0")
-    username: str      = os.getenv("REDDIT_USERNAME", "")
-    password: str      = os.getenv("REDDIT_PASSWORD", "")
+    user_agent: str = os.getenv("REDDIT_USER_AGENT", "RedditEngagementBot/1.0 (public JSON API)")
 
 
 @dataclass
@@ -31,23 +27,28 @@ class AnthropicConfig:
 @dataclass
 class ScraperConfig:
     # ----- Tune these to your domain -----
-    domain: str                = "machine learning"
+    domain: str                = "application security API security DevSecOps"
     subreddits: List[str]      = field(default_factory=lambda: [
-        "MachineLearning", "learnmachinelearning", "mlops", "Python"
+        "netsec", "websecurity", "devops", "cybersecurity",
+        "devsecops", "programming", "softwaresecurity", "kubernetes",
     ])
     keywords: List[str]        = field(default_factory=lambda: [
-        "best practices", "help", "career", "advice", "tutorial"
+        "API security testing", "SAST static analysis",
+        "DevSecOps CI CD", "application security",
     ])
-    your_expertise: str        = "ML engineer with 5 years in production systems"
+    your_expertise: str        = (
+        "application security engineer with experience in API security testing, "
+        "DevSecOps, SAST/SCA, and autonomous vulnerability detection"
+    )
 
     # ----- Engagement thresholds -----
-    min_score: int      = 10    # Minimum upvotes for a post to qualify
-    min_comments: int   = 5     # Minimum comment count
+    min_score: int      = 5     # Minimum upvotes for a post to qualify
+    min_comments: int   = 2     # Minimum comment count
     max_posts: int      = 10    # How many top posts to generate comments for
 
     # ----- Fetch settings -----
-    time_filter: str    = "day"   # hour | day | week | month | year | all
-    sort_by: str        = "hot"   # hot | new | top | rising
+    time_filter: str    = "week"  # hour | day | week | month | year | all
+    sort_by: str        = "top"   # hot | new | top | rising
 
     # ----- Output -----
     output_format: str  = "json"  # json | csv | both

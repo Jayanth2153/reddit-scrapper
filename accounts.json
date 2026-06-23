@@ -1,0 +1,10 @@
+[
+  {
+    "id": "acc_default",
+    "username": "aptoridemo",
+    "password": "Demo@1234",
+    "active": true,
+    "note": "Primary Aptori account",
+    "added_at": "2026-06-20T14:59:22.331458"
+  }
+]
