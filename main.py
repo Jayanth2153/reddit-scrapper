@@ -15,6 +15,7 @@ from config import reddit as reddit_cfg, anthropic as anthropic_cfg, scraper as 
 from rate_limiter import RateLimitManager
 from reddit_client import RedditScraper, RedditPost
 from claude_client import ClaudeCommentGenerator
+from storage import get_today_commented_count
 
 
 # ══════════════════════════════════════════════════════════════════════
