@@ -53,21 +53,29 @@ def main():
     print("  STEP 1  --  Scraping posts by keyword")
     print(f"{'-' * W}")
 
+    already_scraped = storage.get_scraped_ids()
+    print(f"  [INFO]  {len(already_scraped)} post IDs already processed — will skip them")
+
     scraper = RedditScraper(reddit_cfg, rate_manager)
     posts   = scraper.scrape(
         domain      = scraper_cfg.domain,
         subreddits  = scraper_cfg.subreddits,
         keywords    = keywords,
-        max_posts   = MAX_POSTS,
+        max_posts   = MAX_POSTS * 3,   # fetch extra, then filter
         time_filter = "week",
         sort_by     = "top",
     )
 
+    # Remove already-processed posts
+    posts = [p for p in posts if p.id not in already_scraped]
+    # Take best 10 by engagement score (already sorted by scraper)
+    posts = posts[:MAX_POSTS]
+
     if not posts:
-        print("[WARN]  No posts found. Reddit may be rate-limiting. Try again later.")
+        print("[WARN]  No new posts found — all top posts already processed. Try again tomorrow.")
         sys.exit(0)
 
-    print(f"\n  [OK]  {len(posts)} posts scraped")
+    print(f"\n  [OK]  {len(posts)} new posts scraped (skipped already-processed ones)")
 
     # STEP 2: Fetch human comments
     print(f"\n{'-' * W}")
