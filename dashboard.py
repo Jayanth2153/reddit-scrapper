@@ -1577,6 +1577,126 @@ elif page == "Content Studio":
                         st.session_state["sidebar_nav"]   = "Content Studio"
                         st.rerun()
 
+    # =========================================================================
+    # TAB 4 — GENERATED POSTS
+    # =========================================================================
+    with tab_posts:
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if not _hist_all:
+            st.markdown(
+                '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
+                'padding:48px;text-align:center">'
+                '<div style="font-size:36px;margin-bottom:12px">🎨</div>'
+                '<div style="color:var(--c-t1);font-size:15px;font-weight:600;margin-bottom:6px">No generated content yet</div>'
+                '<div style="color:var(--c-t3);font-size:13px">Generate a Post Image or Post Video — it will appear here with a ready-to-copy Reddit post.</div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            _filter_type = st.radio("Show", ["All", "Images", "Videos"], horizontal=True, key="gp_filter")
+            _show_entries = {
+                "All":    _hist_all,
+                "Images": _hist_imgs,
+                "Videos": _hist_vids,
+            }[_filter_type]
+
+            for _he in _show_entries:
+                _hrid     = _he.get("request_id", "")
+                _htype    = _he.get("type", "image")
+                _hurl     = _he.get("result_url", "")
+                _hprompt  = _he.get("prompt", "")
+                _hmodel   = _he.get("model", "").split("/")[-1]
+                _hcredits = _he.get("credits", 0)
+                _hdate    = _he.get("created_at", "")[:10]
+                _htext    = _he.get("reddit_text", "")
+                _hposted  = _he.get("posted", False)
+                _htopic   = _he.get("topic", "")
+
+                _posted_badge = (
+                    '<span style="background:#10b98122;color:#10b981;font-size:11px;font-weight:700;'
+                    'padding:2px 10px;border-radius:20px">Posted</span>'
+                ) if _hposted else (
+                    '<span style="background:#f59e0b22;color:#f59e0b;font-size:11px;font-weight:700;'
+                    'padding:2px 10px;border-radius:20px">Not posted</span>'
+                )
+                _type_icon = "🖼" if _htype == "image" else "🎬"
+
+                st.markdown(
+                    f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
+                    f'padding:0;margin-bottom:16px;overflow:hidden">'
+                    f'<div style="padding:14px 18px;border-bottom:1px solid var(--c-b1);display:flex;'
+                    f'align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+                    f'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+                    f'<span style="font-size:18px">{_type_icon}</span>'
+                    f'<span style="color:var(--c-t1);font-size:13px;font-weight:700">{_hprompt[:60]}{"…" if len(_hprompt)>60 else ""}</span>'
+                    f'</div>'
+                    f'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+                    f'{_posted_badge}'
+                    f'<span style="color:var(--c-t3);font-size:11px">{_hmodel} · {_hcredits} credits · {_hdate}</span>'
+                    f'</div>'
+                    f'</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+                # Image/video + text side by side
+                _mc1, _mc2 = st.columns([2, 3])
+                with _mc1:
+                    if _hurl:
+                        if _htype == "image":
+                            st.image(_hurl, use_container_width=True)
+                        else:
+                            st.video(_hurl)
+                    else:
+                        st.markdown(
+                            '<div style="background:var(--c-row);border-radius:10px;padding:24px;'
+                            'text-align:center;color:var(--c-t3);font-size:12px">No preview available</div>',
+                            unsafe_allow_html=True,
+                        )
+                with _mc2:
+                    if _htext:
+                        _new_text = st.text_area(
+                            "Reddit post text",
+                            value=_htext,
+                            height=180,
+                            key=f"gp_text_{_hrid}",
+                            label_visibility="collapsed",
+                        )
+                        if _new_text != _htext:
+                            hf.update_entry(_hrid, {"reddit_text": _new_text})
+                    else:
+                        _regen_col, _ = st.columns([2, 3])
+                        if _regen_col.button("Generate Post Text", key=f"gp_gen_{_hrid}", use_container_width=True):
+                            with st.spinner("Writing Reddit post text…"):
+                                _new_rtext = generate_reddit_post_text(_hprompt, _htopic, _htype)
+                            hf.update_entry(_hrid, {"reddit_text": _new_rtext})
+                            st.rerun()
+
+                    # Action buttons
+                    _ab1, _ab2, _ab3 = st.columns(3)
+                    if _ab1.button(
+                        "Mark as Posted" if not _hposted else "Unmark Posted",
+                        key=f"gp_post_{_hrid}",
+                        use_container_width=True,
+                        type="primary" if not _hposted else "secondary",
+                    ):
+                        hf.update_entry(_hrid, {"posted": not _hposted})
+                        st.rerun()
+                    if _hurl:
+                        _ab2.markdown(
+                            f'<a href="{_hurl}" target="_blank" '
+                            f'style="display:block;background:var(--c-b1);color:var(--c-t1);'
+                            f'padding:8px 12px;border-radius:8px;text-align:center;font-size:13px;'
+                            f'font-weight:600;text-decoration:none;width:100%;box-sizing:border-box">Download ↗</a>',
+                            unsafe_allow_html=True,
+                        )
+                    if _ab3.button("Remove", key=f"gp_del_{_hrid}", use_container_width=True):
+                        hf.delete_entry(_hrid)
+                        st.rerun()
+
+                st.markdown('<div style="margin-bottom:4px"></div>', unsafe_allow_html=True)
+
 # =============================================================================
 # PAGE 8 — HIGGSFIELD CREDITS
 # =============================================================================
