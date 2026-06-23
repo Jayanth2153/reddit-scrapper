@@ -1882,16 +1882,19 @@ elif page == "Media Lab":
                         'text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Reddit Post Copy</div>',
                         unsafe_allow_html=True,
                     )
-                    if _mtext:
+                    # strip old error strings so the generate button re-appears
+                    _clean_text = _mtext if (_mtext and not _mtext.startswith("[Could not")) else ""
+
+                    if _clean_text:
                         _edited = st.text_area(
                             "post_copy",
-                            value=_mtext,
+                            value=_clean_text,
                             height=155,
                             key=f"ml_txt_{_mrid}",
                             label_visibility="collapsed",
                             help="Copy this and paste into Reddit when you open the post form",
                         )
-                        if _edited != _mtext:
+                        if _edited != _clean_text:
                             hf.update_entry(_mrid, {"reddit_text": _edited})
                         st.markdown(
                             '<div style="color:var(--c-t3);font-size:11px;margin-top:4px">'
@@ -1901,8 +1904,11 @@ elif page == "Media Lab":
                         if st.button("Regenerate Copy", key=f"ml_regen_{_mrid}", use_container_width=True):
                             with st.spinner("Rewriting…"):
                                 _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
-                            hf.update_entry(_mrid, {"reddit_text": _new_txt})
-                            st.rerun()
+                            if _new_txt.startswith("[Could not"):
+                                st.error(_new_txt)
+                            else:
+                                hf.update_entry(_mrid, {"reddit_text": _new_txt})
+                                st.rerun()
                     else:
                         st.markdown(
                             '<div style="background:var(--c-row);border:1px dashed var(--c-b2);'
@@ -1914,8 +1920,11 @@ elif page == "Media Lab":
                         if st.button("Generate Post Copy", key=f"ml_gen_{_mrid}", type="primary", use_container_width=True):
                             with st.spinner("Writing human-style post…"):
                                 _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
-                            hf.update_entry(_mrid, {"reddit_text": _new_txt})
-                            st.rerun()
+                            if _new_txt.startswith("[Could not"):
+                                st.error(f"Generation failed: {_new_txt}")
+                            else:
+                                hf.update_entry(_mrid, {"reddit_text": _new_txt})
+                                st.rerun()
 
                 # ── COL 3: Post to Reddit ────────────────────────────────────
                 with _col3:
