@@ -1747,9 +1747,8 @@ elif page == "Media Lab":
         )
     else:
         # ── Filter bar (dropdowns) ────────────────────────────────────────────
-        _ml_fa, _ml_fb, _ml_fc = st.columns([1.6, 1.6, 5])
-        _ml_type_f   = _ml_fa.selectbox("Type",   ["All", "Images", "Videos"], key="ml_type_f")
-        _ml_status_f = _ml_fb.selectbox("Status", ["All", "Pending", "Posted"], key="ml_status_f")
+        _ml_sf_col, _ = st.columns([1.6, 6.4])
+        _ml_status_f = _ml_sf_col.selectbox("Status", ["All", "Pending", "Posted"], key="ml_status_f")
 
         def _ml_apply_status(lst):
             if _ml_status_f == "Pending":
@@ -1758,15 +1757,8 @@ elif page == "Media Lab":
                 return [e for e in lst if e.get("posted", False)]
             return lst
 
-        if _ml_type_f == "Images":
-            _show_imgs = _ml_apply_status(_ml_all_imgs)
-            _show_vids = []
-        elif _ml_type_f == "Videos":
-            _show_imgs = []
-            _show_vids = _ml_apply_status(_ml_all_vids)
-        else:
-            _show_imgs = _ml_apply_status(_ml_all_imgs)
-            _show_vids = _ml_apply_status(_ml_all_vids)
+        _show_imgs = _ml_apply_status(_ml_all_imgs)
+        _show_vids = _ml_apply_status(_ml_all_vids)
 
         # Accounts list for the Reddit post column
         _ml_accts = [a.get("username", "") for a in get_accounts() if a.get("status", "active") == "active" and a.get("username")]
