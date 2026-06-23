@@ -235,9 +235,9 @@ def _run(args: list, timeout: int = 300) -> tuple[str, str, int]:
 def _extract_url(text: str) -> str:
     match = re.search(r"https://\S+\.(jpg|jpeg|png|webp|mp4|mov|gif)[\S]*", text, re.IGNORECASE)
     if match:
-        return match.group(0).rstrip(".,)")
+        return match.group(0).rstrip('.,)"\'\\')
     match = re.search(r"https://\S+", text)
-    return match.group(0).rstrip(".,)") if match else ""
+    return match.group(0).rstrip('.,)"\'\\') if match else ""
 
 
 class HiggsFieldClient:
