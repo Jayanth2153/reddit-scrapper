@@ -118,8 +118,14 @@ st.markdown(f"""
     background: var(--c-sbg) !important;
     border-right: 1px solid var(--c-b1);
     padding-top: 0;
+    min-width: 240px !important;
+    max-width: 260px !important;
 }}
-[data-testid="stSidebar"] > div:first-child {{ padding-top: 0; }}
+[data-testid="stSidebar"] > div:first-child {{
+    padding-top: 0;
+    min-width: 240px !important;
+    max-width: 260px !important;
+}}
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span {{ color: var(--c-t1b); }}
 [data-testid="stSidebar"] .stCaption {{ color: var(--c-t3) !important; }}
