@@ -755,6 +755,41 @@ _stc.html("""
     setInterval(updateToggleBtn, 400);
     updateToggleBtn();
 
+    // ── Copy button: use execCommand so it works inside any iframe context ──
+    function setupCopyBtns() {
+        doc.querySelectorAll('.ml-copy-btn:not([data-wired])').forEach(function(btn) {
+            btn.setAttribute('data-wired', '1');
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var raw = btn.getAttribute('data-b64') || '';
+                var text = '';
+                try { text = decodeURIComponent(escape(atob(raw))); } catch(ex) { text = raw; }
+                var ta = doc.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.cssText = 'position:absolute;left:-9999px;top:0;opacity:0';
+                doc.body.appendChild(ta);
+                ta.select();
+                var ok = false;
+                try { ok = doc.execCommand('copy'); } catch(ex) {}
+                doc.body.removeChild(ta);
+                if (ok) {
+                    var orig = btn.textContent;
+                    btn.textContent = '✓ Copied';
+                    btn.style.color = '#10b981';
+                    btn.style.borderColor = '#10b981';
+                    setTimeout(function() {
+                        btn.textContent = orig;
+                        btn.style.color = '';
+                        btn.style.borderColor = '';
+                    }, 2000);
+                }
+            });
+        });
+    }
+    setInterval(setupCopyBtns, 400);
+    setupCopyBtns();
+
 })();
 </script>
 """, height=0)
