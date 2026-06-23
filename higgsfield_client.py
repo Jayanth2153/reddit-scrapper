@@ -360,10 +360,13 @@ class HiggsFieldClient:
             return {"error": err or out or "Generation failed"}
 
         result_url = _extract_url(out)
-        request_id = ""
+        import uuid as _uuid
+        request_id = str(_uuid.uuid4())
         try:
             data = json.loads(out)
-            request_id = str(data.get("id", data.get("request_id", "")))
+            hf_id = str(data.get("id", data.get("request_id", "")))
+            if hf_id:
+                request_id = hf_id
             result_url = result_url or data.get("url", "")
         except Exception:
             pass
