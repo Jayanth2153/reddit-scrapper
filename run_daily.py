@@ -100,8 +100,9 @@ def main():
         expertise = scraper_cfg.your_expertise,
     )
 
-    # STEP 4: Save
+    # STEP 4: Save and mark IDs as processed
     storage.save_results(suggestions)
+    storage.mark_scraped_ids([p.id for p in posts])
 
     insights = [
         {
