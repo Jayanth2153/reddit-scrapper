@@ -1607,14 +1607,14 @@ elif page == "Accounts Manager":
 
     import base64 as _b64
 
-    # ── Step 1: Login prompt ──────────────────────────────────────────────────
+    # ── Step 1: Login to Reddit ───────────────────────────────────────────────
     st.markdown(
         '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
         'padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;'
         'justify-content:space-between;flex-wrap:wrap;gap:16px">'
         '<div>'
         '<div style="color:var(--c-t1);font-size:15px;font-weight:700;margin-bottom:4px">Step 1 — Login to Reddit</div>'
-        '<div style="color:var(--c-t3);font-size:13px">Opens Reddit in a new tab. Log in, then come back here to verify.</div>'
+        '<div style="color:var(--c-t3);font-size:13px">Opens Reddit in a new tab. Log in there, then come back and fill the form below.</div>'
         '</div>'
         '<a href="https://www.reddit.com/login" target="_blank" '
         'style="background:#FF4500;color:#fff;padding:10px 24px;border-radius:9px;'
@@ -1623,115 +1623,36 @@ elif page == "Accounts Manager":
         unsafe_allow_html=True,
     )
 
-    # ── Step 2: Verify + preview ──────────────────────────────────────────────
+    # ── Step 2: Add account (no API call) ────────────────────────────────────
     st.markdown(
         '<div style="color:var(--c-t1);font-size:14px;font-weight:700;margin-bottom:10px">'
-        'Step 2 — Verify your account</div>',
+        'Step 2 — Save your account</div>',
         unsafe_allow_html=True,
     )
 
-    v1, v2, v3 = st.columns([3, 1, 4])
-    verify_input = v1.text_input("Enter your Reddit username", placeholder="AptoriOfficial", key="acc_verify_uname", label_visibility="collapsed")
-    verify_btn   = v2.button("Verify", type="primary", key="acc_verify_btn", use_container_width=True)
+    with st.form("acc_save_form"):
+        sf1, sf2 = st.columns(2)
+        save_uname = sf1.text_input("Reddit username", placeholder="YourRedditUsername", key="acc_form_uname")
+        save_pwd   = sf2.text_input("Password (stored locally)", type="password", key="acc_form_pwd")
+        sf3, sf4, sf5 = st.columns(3)
+        save_role  = sf3.selectbox("Role", ["Brand", "Founder", "Thought Leadership", "Community", "Personal"], key="acc_form_role")
+        save_risk  = sf4.selectbox("Risk", ["Low", "Medium", "High"], key="acc_form_risk")
+        save_notes = sf5.text_input("Notes (optional)", key="acc_form_notes")
+        st.caption("Password stored locally in accounts.json — never sent anywhere.")
+        submitted = st.form_submit_button("Save Account", type="primary")
 
-    if verify_btn and verify_input.strip():
-        clean = verify_input.strip().lstrip("u/")
-        with st.spinner(f"Looking up u/{clean} on Reddit..."):
-            profile = _fetch_reddit_profile(clean)
-        err = profile.get("error") if isinstance(profile, dict) else None
-        if err == "not_found":
-            st.error(f"u/{clean} doesn't exist on Reddit — double-check the spelling.")
-        elif err == "rate_limit":
-            st.warning("Reddit is rate-limiting right now. Wait 30 seconds and try again.")
-        elif err in ("blocked", "network"):
-            # Reddit blocked the request — let user manually confirm and skip API check
-            st.warning(
-                f"Reddit blocked the lookup (this happens sometimes). "
-                f"If you're sure u/{clean} is correct and you're logged in, click **Save without verify** below."
-            )
-            st.session_state["acc_verify_name"] = clean
-            st.session_state["acc_verified_profile"] = {
-                "name": clean, "total_karma": 0, "link_karma": 0,
-                "comment_karma": 0, "created_utc": 0,
-                "is_gold": False, "verified": False, "_manual": True,
-            }
-        elif not err:
-            st.session_state["acc_verified_profile"] = profile
-            st.session_state["acc_verify_name"] = clean
-
-    # ── Show verified profile preview + save form ─────────────────────────────
-    verified_profile = st.session_state.get("acc_verified_profile")
-    verified_name    = st.session_state.get("acc_verify_name", "")
-
-    if verified_profile and verified_name:
-        _is_manual = verified_profile.get("_manual", False)
-        border_color = "#f59e0b" if _is_manual else "#10b981"
-        badge_html = (
-            '<span style="background:#f59e0b22;color:#f59e0b;font-size:11px;font-weight:700;'
-            'padding:2px 8px;border-radius:20px">Manually confirmed</span>'
-        ) if _is_manual else (
-            '<span style="background:#10b98122;color:#10b981;font-size:11px;font-weight:700;'
-            'padding:2px 8px;border-radius:20px">Verified via Reddit</span>'
-        )
-        created_utc = verified_profile.get("created_utc", 0)
-        if created_utc:
-            created_dt = datetime.utcfromtimestamp(created_utc)
-            account_age_days = (datetime.utcnow() - created_dt).days
-            age_str = f"{account_age_days // 365}y {account_age_days % 365 // 30}m" if account_age_days > 30 else f"{account_age_days}d"
+    if submitted:
+        clean = save_uname.strip().lstrip("u/")
+        if not clean:
+            st.warning("Enter a Reddit username first.")
         else:
-            age_str = "—"
-
-        st.markdown(
-            f'<div style="background:var(--c-card);border:2px solid {border_color};border-radius:14px;'
-            f'padding:20px 24px;margin:12px 0 20px">'
-            f'<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap">'
-            f'<div style="width:52px;height:52px;background:#FF450022;border:2px solid #FF4500;'
-            f'border-radius:50%;display:flex;align-items:center;justify-content:center;'
-            f'color:#FF4500;font-size:22px;font-weight:800">{verified_profile["name"][0].upper()}</div>'
-            f'<div>'
-            f'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-            f'<span style="color:var(--c-t1);font-size:17px;font-weight:800">u/{verified_profile["name"]}</span>'
-            f'{badge_html}'
-            f'</div>'
-            f'<div style="color:var(--c-t3);font-size:12px;margin-top:2px">Account age: {age_str}</div>'
-            f'</div>'
-            f'</div>'
-            + (
-                f'<div style="display:flex;gap:20px;flex-wrap:wrap">'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Total Karma</div>'
-                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["total_karma"]:,}</div></div>'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Post Karma</div>'
-                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["link_karma"]:,}</div></div>'
-                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Comment Karma</div>'
-                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["comment_karma"]:,}</div></div>'
-                f'</div>'
-                if not _is_manual else
-                f'<div style="color:var(--c-t3);font-size:12px">Karma will not be available — Reddit blocked the lookup. Account saved by manual confirmation.</div>'
-            )
-            + f'</div>',
-            unsafe_allow_html=True,
-        )
-
-        # Save form
-        with st.form("acc_save_form"):
-            sf1, sf2 = st.columns(2)
-            save_pwd  = sf1.text_input("Password (stored locally)", type="password", key="acc_save_pwd")
-            save_role = sf2.selectbox("Role", ["Brand","Founder","Thought Leadership","Community","Personal"], key="acc_save_role")
-            sf3, sf4 = st.columns(2)
-            save_risk  = sf3.selectbox("Risk", ["Low","Medium","High"], key="acc_save_risk")
-            save_notes = sf4.text_input("Notes (optional)", key="acc_save_notes")
-            st.caption("Password stored locally in accounts.json — never sent anywhere.")
-            _btn_label = "Save without verify" if _is_manual else "Save Account"
-            submitted = st.form_submit_button(_btn_label, type="primary")
-
-        if submitted:
-            existing_names = [a.get("username","") for a in get_accounts()]
-            if verified_name in existing_names:
-                st.warning(f"u/{verified_name} is already saved.")
+            existing_names = [a.get("username", "") for a in get_accounts()]
+            if clean in existing_names:
+                st.warning(f"u/{clean} is already saved.")
             else:
                 _enc = _b64.b64encode(save_pwd.encode()).decode() if save_pwd else ""
                 add_account({
-                    "username":      verified_name,
+                    "username":      clean,
                     "password":      _enc,
                     "role":          save_role,
                     "risk":          save_risk,
@@ -1741,12 +1662,10 @@ elif page == "Accounts Manager":
                     "posts_made":    0,
                     "verified_pass": 0,
                     "verified_fail": 0,
-                    "karma":         verified_profile["total_karma"],
-                    "account_age":   age_str,
+                    "karma":         0,
+                    "account_age":   "—",
                 })
-                st.success(f"u/{verified_name} added!")
-                del st.session_state["acc_verified_profile"]
-                del st.session_state["acc_verify_name"]
+                st.success(f"u/{clean} added!")
                 time.sleep(0.4)
                 st.rerun()
 
