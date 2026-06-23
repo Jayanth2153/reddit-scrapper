@@ -299,6 +299,17 @@ class HiggsFieldClient:
     def credit_history(self) -> list:
         return list(reversed(self._log))
 
+    def update_entry(self, request_id: str, updates: dict):
+        for entry in self._log:
+            if entry.get("request_id") == request_id:
+                entry.update(updates)
+                self._save()
+                return
+
+    def delete_entry(self, request_id: str):
+        self._log = [e for e in self._log if e.get("request_id") != request_id]
+        self._save()
+
     def estimate_credits(self, model_id: str, duration: int = 5) -> int:
         base = CREDIT_COSTS.get(model_id, 10)
         if model_id in TEXT_TO_VIDEO_MODELS:
