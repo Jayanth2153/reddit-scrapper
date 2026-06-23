@@ -755,29 +755,6 @@ _stc.html("""
     setInterval(updateToggleBtn, 400);
     updateToggleBtn();
 
-    // ── Copy-button handler (no iframes) ─────────────────────────────
-    function setupCopyBtns() {
-        doc.querySelectorAll('.ml-copy-btn:not([data-wired])').forEach(function(btn) {
-            btn.setAttribute('data-wired', '1');
-            btn.addEventListener('click', function() {
-                var raw = btn.getAttribute('data-b64') || '';
-                var text = '';
-                try { text = decodeURIComponent(escape(atob(raw))); } catch(e) { text = raw; }
-                navigator.clipboard.writeText(text).then(function() {
-                    btn.textContent = '✓';
-                    btn.style.color = '#10b981';
-                    btn.style.borderColor = '#10b981';
-                    setTimeout(function() {
-                        btn.textContent = '📋';
-                        btn.style.color = '';
-                        btn.style.borderColor = '';
-                    }, 1800);
-                });
-            });
-        });
-    }
-    setInterval(setupCopyBtns, 400);
-    setupCopyBtns();
 })();
 </script>
 """, height=0)
