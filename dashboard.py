@@ -1785,6 +1785,8 @@ elif page == "Media Lab":
                 _mrid     = _me.get("request_id") or f"{tab_pfx}_{_midx}"
                 _mtype    = _me.get("type", "image")
                 _murl     = _me.get("result_url", "")
+                _mlocal   = _me.get("local_path", "")
+                _msrc     = _mlocal if (_mlocal and os.path.exists(_mlocal)) else _murl
                 _mprompt  = _me.get("prompt", "")
                 _mmodel   = (_me.get("model", "") or "").split("/")[-1]
                 _mcredits = _me.get("credits", 0)
