@@ -21,7 +21,7 @@ from storage import (
     get_all, get_insights, get_accounts, save_accounts,
     add_account, update_account, delete_account,
     get_keywords_data, save_keywords_data, init_keywords_data,
-    update_comment_by_post_id, get_publishing_tracker, mark_comment_posted,
+    update_comment_by_post_id,
     get_settings, save_settings, save_results,
 )
 from higgsfield_client import (
