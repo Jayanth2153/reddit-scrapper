@@ -831,6 +831,14 @@ elif page == "Post Discovery":
             except Exception:
                 age_label = ""
 
+            cmt_ready_badge = (
+                '<span style="background:#10b98122;color:#10b981;font-size:10px;'
+                'padding:2px 8px;border-radius:4px;font-weight:600">Comment Ready</span>'
+            ) if has_cmt else ""
+            selftext_snippet = (
+                f'<div style="color:var(--c-t3);font-size:12px;margin-top:6px;line-height:1.5">'
+                f'{p["selftext"][:160]}...</div>'
+            ) if p.get("selftext") else ""
             st.markdown(
                 f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;'
                 f'padding:16px 20px;margin-bottom:12px">'
@@ -842,10 +850,10 @@ elif page == "Post Discovery":
                 f'<span style="color:var(--c-t3);font-size:11px">💬 {p.get("num_comments",0)}</span>'
                 f'<span style="background:var(--c-b1);color:var(--c-t2);font-size:10px;padding:2px 7px;border-radius:4px">{kw}</span>'
                 f'<span style="color:var(--c-t3);font-size:10px">{age_label}</span>'
-                f'{"<span style=\'background:#10b98122;color:#10b981;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600\'>Comment Ready</span>" if has_cmt else ""}'
+                f'{cmt_ready_badge}'
                 f'</div>'
                 f'<div style="color:var(--c-t1);font-size:14px;font-weight:600;line-height:1.4">{p.get("title","")}</div>'
-                f'{"<div style=\\"color:var(--c-t3);font-size:12px;margin-top:6px;line-height:1.5\\">" + p["selftext"][:160] + "…</div>" if p.get("selftext") else ""}'
+                f'{selftext_snippet}'
                 f'</div></div>',
                 unsafe_allow_html=True,
             )
