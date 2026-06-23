@@ -283,6 +283,16 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     border: 1px solid var(--c-iborder) !important;
     border-radius: 8px !important;
 }}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {{
+    .main .block-container {{ padding: 1rem 1rem 2rem !important; }}
+    [data-testid="stHorizontalBlock"] > div {{ min-width: 48% !important; flex: 1 1 48% !important; }}
+}}
+@media (max-width: 600px) {{
+    .main .block-container {{ padding: 0.5rem 0.5rem 1.5rem !important; }}
+    [data-testid="stHorizontalBlock"] > div {{ min-width: 100% !important; flex: 1 1 100% !important; }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
