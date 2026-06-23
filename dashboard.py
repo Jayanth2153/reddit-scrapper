@@ -1675,7 +1675,7 @@ elif page == "Accounts Manager":
             'padding:40px;text-align:center">'
             '<div style="font-size:32px;margin-bottom:10px">🔑</div>'
             '<div style="color:var(--c-t1);font-size:15px;font-weight:600;margin-bottom:6px">No accounts yet</div>'
-            '<div style="color:var(--c-t3);font-size:13px">Click <b>Login to Reddit</b> above, then fill the form to save your account.</div>'
+            '<div style="color:var(--c-t3);font-size:13px">Log in on Reddit manually, then register the username above to start tracking.</div>'
             '</div>',
             unsafe_allow_html=True,
         )
