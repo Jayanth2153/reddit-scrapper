@@ -852,7 +852,7 @@ elif page == "Human Insights":
 # PAGE 5 — COMMENT STUDIO
 # =============================================================================
 elif page == "Comment Studio":
-    st.markdown(section_header("Comment Studio", "Paste any Reddit URL or pick a post — Claude generates a humanized comment instantly."), unsafe_allow_html=True)
+    st.markdown(section_header("Comment Studio", "Top scraped posts with Claude-generated humanized comments — copy, post, confirm."), unsafe_allow_html=True)
 
     # ── URL-based generation (primary workflow) ──────────────────────────────
     st.markdown(
