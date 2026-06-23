@@ -316,13 +316,11 @@ class HiggsFieldClient:
                     if _k not in entry:
                         entry[_k] = _v
                         changed = True
-                # cache images locally so they survive CDN expiry
-                # skip videos — large files slow startup and preview uses URL directly
+                # cache media locally so it survives CDN expiry
                 rid       = entry.get("request_id", "")
                 cur_local = entry.get("local_path", "")
                 cur_url   = entry.get("result_url", "")
-                is_image  = entry.get("type", "image") != "video"
-                if is_image and cur_url and rid and (not cur_local or not Path(cur_local).exists()):
+                if cur_url and rid and (not cur_local or not Path(cur_local).exists()):
                     dest = _local_path_for(rid, cur_url)
                     if Path(dest).exists() or _download_media(cur_url, dest):
                         entry["local_path"] = dest
