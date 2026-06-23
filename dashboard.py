@@ -711,10 +711,7 @@ elif page == "Keyword Monitor":
                     kd.append({"keyword": new_kw.strip(), "status": "active",
                                "posts_found": 0, "quality_score": 0, "last_scan": ""})
                     save_keywords_data(kd)
-                    # Also append to keywords.txt
-                    kw_file = Path("keywords.txt")
-                    with open(kw_file, "a", encoding="utf-8") as f:
-                        f.write(f"\n{new_kw.strip()}")
+                    sync_keywords_to_file()
                     st.success(f"Added: {new_kw.strip()}")
                     time.sleep(0.5)
                     st.rerun()
