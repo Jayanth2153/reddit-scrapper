@@ -469,6 +469,7 @@ class HiggsFieldClient:
             result_url = result_url or data.get("url", "")
         except Exception:
             pass
+        result_url = result_url.rstrip('.,)"\'\\')
 
         self._log.append({
             "type": "video", "model": model, "topic": topic,
