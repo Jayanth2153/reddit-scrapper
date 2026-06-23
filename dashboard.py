@@ -1600,20 +1600,6 @@ elif page == "Accounts Manager":
         unsafe_allow_html=True,
     )
 
-    # ── Aptori login quick-link ───────────────────────────────────────────────
-    st.markdown(
-        '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;'
-        'padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'
-        '<div>'
-        '<div style="color:var(--c-t1);font-weight:600;font-size:14px;margin-bottom:2px">Aptori Platform</div>'
-        '<div style="color:var(--c-t3);font-size:12px">Log in to Aptori to manage API security testing</div>'
-        '</div>'
-        '<a href="https://app.aptori.dev" target="_blank" style="background:#E63946;color:#fff;padding:8px 18px;'
-        'border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap">Login to Aptori</a>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
     with st.expander("+ Add Reddit Account", expanded=False):
         a1, a2 = st.columns(2)
         new_uname  = a1.text_input("Reddit username", placeholder="u/AptoriOfficial", key="acc_uname")
@@ -1626,7 +1612,7 @@ elif page == "Accounts Manager":
         new_email  = a6.text_input("Email (optional)", placeholder="linked email", key="acc_email")
         new_rules  = st.text_area("Posting rules", "No spammy CTA. Always add value first. Mention Aptori only when relevant.", height=80, key="acc_rules")
         new_notes  = st.text_input("Notes", key="acc_notes")
-        st.caption("Password is stored locally in accounts.json — never sent anywhere. Manual posting only.")
+        st.caption("Credentials stored locally only — never sent anywhere. Use them to log in manually via the button below each account.")
 
         if st.button("Add Account", type="primary", key="acc_add_btn"):
             if new_uname.strip():
