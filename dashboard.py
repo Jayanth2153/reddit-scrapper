@@ -518,7 +518,7 @@ NAV_ITEMS = [
     "Post Discovery",
     "Comment Studio",
     "Content Studio",
-    "Higgsfield Credits",
+    "Media Lab",
     "Account Roster",
     "Settings",
 ]
@@ -1527,8 +1527,8 @@ elif page == "Content Studio":
 # =============================================================================
 # PAGE 8 — HIGGSFIELD CREDITS
 # =============================================================================
-elif page == "Higgsfield Credits":
-    st.markdown(section_header("Higgsfield Credits", "Track credit usage across all AI generations"), unsafe_allow_html=True)
+elif page == "Media Lab":
+    st.markdown(section_header("Media Lab", "Track credit usage across all AI generations"), unsafe_allow_html=True)
 
     c1, c2, c3, c4 = st.columns(4)
     c1.markdown(metric_card("Credits Available",   hf_credits or "—",              "from your plan",    "#10b981"), unsafe_allow_html=True)
