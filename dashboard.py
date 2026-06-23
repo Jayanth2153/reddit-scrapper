@@ -1970,23 +1970,35 @@ elif page == "Media Lab":
                         _edited = st.text_area(
                             "post_copy",
                             value=_clean_text,
-                            height=100,
+                            height=120,
                             key=f"ml_txt_{_mrid}",
                             label_visibility="collapsed",
-                            help="Edit here, then click the copy icon on the code block below",
+                            help="Edit here, then click Copy below",
                         )
                         if _edited != _clean_text:
                             hf.update_entry(_mrid, {"reddit_text": _edited})
-                        # native Streamlit copy (always works — no JS needed)
-                        st.code(_edited or _clean_text, language=None)
-                        if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
-                            with st.spinner("Rewriting…"):
-                                _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
-                            if _new_txt.startswith("[Could not"):
-                                st.error(_new_txt)
-                            else:
-                                st.session_state[f"_pending_txt_{_mrid}"] = _new_txt
-                                st.rerun()
+                        import base64 as _b64
+                        _cp_b64 = _b64.b64encode((_edited or _clean_text).encode()).decode()
+                        _btn_c, _btn_r = st.columns(2)
+                        with _btn_c:
+                            st.markdown(
+                                f'<button class="ml-copy-btn" data-b64="{_cp_b64}" '
+                                f'style="width:100%;background:transparent;'
+                                f'border:1px solid rgba(250,250,250,0.2);border-radius:8px;'
+                                f'padding:6px 14px;cursor:pointer;font-size:13px;color:#fafafa;'
+                                f'font-family:inherit;font-weight:500;line-height:1.5;'
+                                f'transition:border-color .15s,color .15s">Copy</button>',
+                                unsafe_allow_html=True,
+                            )
+                        with _btn_r:
+                            if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
+                                with st.spinner("Rewriting…"):
+                                    _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
+                                if _new_txt.startswith("[Could not"):
+                                    st.error(_new_txt)
+                                else:
+                                    st.session_state[f"_pending_txt_{_mrid}"] = _new_txt
+                                    st.rerun()
                     else:
                         st.markdown(
                             '<div style="background:var(--c-row);border:1px dashed var(--c-b2);'
