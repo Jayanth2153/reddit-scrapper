@@ -1601,8 +1601,8 @@ elif page == "Content Studio":
                 "Videos": _hist_vids,
             }[_filter_type]
 
-            for _he in _show_entries:
-                _hrid     = _he.get("request_id", "")
+            for _hidx, _he in enumerate(_show_entries):
+                _hrid     = _he.get("request_id", "") or f"idx_{_hidx}"
                 _htype    = _he.get("type", "image")
                 _hurl     = _he.get("result_url", "")
                 _hprompt  = _he.get("prompt", "")
