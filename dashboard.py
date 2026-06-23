@@ -1916,17 +1916,16 @@ elif page == "Media Lab":
                         )
                         if _edited != _clean_text:
                             hf.update_entry(_mrid, {"reddit_text": _edited})
-                        # ── Tiny JS copy button ───────────────────────────────
-                        import json as _json
-                        _cp_text = _json.dumps(_edited if _edited else _clean_text)
-                        _stc.html(
-                            f'<button onclick="navigator.clipboard.writeText({_cp_text})'
-                            f'.then(()=>{{var b=this;b.textContent=\'✓\';b.style.color=\'#10b981\';'
-                            f'setTimeout(()=>{{b.textContent=\'📋\';b.style.color=\'#888\'}},1800)}})"'
-                            f' title="Copy post text" style="background:none;border:1px solid #3a3a4a;'
-                            f'border-radius:6px;padding:3px 9px;cursor:pointer;font-size:15px;'
-                            f'color:#888;line-height:1.4;font-family:inherit">📋</button>',
-                            height=36,
+                        # ── Copy button (wired by global JS, no iframe) ───────
+                        import base64 as _b64
+                        _cp_b64 = _b64.b64encode((_edited or _clean_text).encode()).decode()
+                        st.markdown(
+                            f'<button class="ml-copy-btn" data-b64="{_cp_b64}" '
+                            f'title="Copy post text to clipboard" '
+                            f'style="background:none;border:1px solid var(--c-b1);border-radius:6px;'
+                            f'padding:4px 10px;cursor:pointer;font-size:15px;color:var(--c-t3);'
+                            f'line-height:1.4;margin-top:4px">📋</button>',
+                            unsafe_allow_html=True,
                         )
                         if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
                             with st.spinner("Rewriting…"):
