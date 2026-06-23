@@ -1826,6 +1826,13 @@ elif page == "Media Lab":
                 _mcredits = _me.get("credits", 0)
                 _mdate    = (_me.get("created_at", "") or "")[:16].replace("T", " ")
                 _mtext    = _me.get("reddit_text", "")
+                # transfer any freshly-generated text from the staging key
+                _pend_txt_key = f"_pending_txt_{_mrid}"
+                if _pend_txt_key in st.session_state:
+                    _pend_val = st.session_state.pop(_pend_txt_key)
+                    if _pend_val:
+                        hf.update_entry(_mrid, {"reddit_text": _pend_val})
+                        _mtext = _pend_val
                 _mposted  = _me.get("posted", False)
                 _mresult  = _me.get("result", "")   # "pass" | "fail" | ""
                 _mtopic   = _me.get("topic", "") or "Aptori"
