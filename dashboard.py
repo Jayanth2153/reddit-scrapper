@@ -1930,25 +1930,29 @@ elif page == "Media Lab":
                         )
                         if _edited != _clean_text:
                             hf.update_entry(_mrid, {"reddit_text": _edited})
-                        # ── Copy button (wired by global JS, no iframe) ───────
+                        # ── Copy + Regenerate buttons ─────────────────────────
                         import base64 as _b64
                         _cp_b64 = _b64.b64encode((_edited or _clean_text).encode()).decode()
-                        st.markdown(
-                            f'<button class="ml-copy-btn" data-b64="{_cp_b64}" '
-                            f'title="Copy post text to clipboard" '
-                            f'style="background:none;border:1px solid var(--c-b1);border-radius:6px;'
-                            f'padding:4px 10px;cursor:pointer;font-size:15px;color:var(--c-t3);'
-                            f'line-height:1.4;margin-top:4px">📋</button>',
-                            unsafe_allow_html=True,
-                        )
-                        if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
-                            with st.spinner("Rewriting…"):
-                                _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
-                            if _new_txt.startswith("[Could not"):
-                                st.error(_new_txt)
-                            else:
-                                hf.update_entry(_mrid, {"reddit_text": _new_txt})
-                                st.rerun()
+                        _btn_c, _btn_r = st.columns(2)
+                        with _btn_c:
+                            st.markdown(
+                                f'<button class="ml-copy-btn" data-b64="{_cp_b64}" '
+                                f'style="width:100%;background:transparent;'
+                                f'border:1px solid rgba(250,250,250,0.2);border-radius:8px;'
+                                f'padding:6px 14px;cursor:pointer;font-size:14px;color:#fafafa;'
+                                f'font-family:inherit;font-weight:400;line-height:1.5;'
+                                f'transition:border-color .15s">Copy</button>',
+                                unsafe_allow_html=True,
+                            )
+                        with _btn_r:
+                            if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
+                                with st.spinner("Rewriting…"):
+                                    _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
+                                if _new_txt.startswith("[Could not"):
+                                    st.error(_new_txt)
+                                else:
+                                    hf.update_entry(_mrid, {"reddit_text": _new_txt})
+                                    st.rerun()
                     else:
                         st.markdown(
                             '<div style="background:var(--c-row);border:1px dashed var(--c-b2);'
