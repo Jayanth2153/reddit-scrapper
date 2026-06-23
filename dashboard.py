@@ -1295,14 +1295,14 @@ elif page == "Comment Studio":
                     unsafe_allow_html=True,
                 )
 
-            b1.link_button(
+            b2.link_button(
                 "Post This Comment ↗",
                 full_url,
                 use_container_width=True,
                 type="primary",
             )
 
-            if b2.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
+            if b3.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
                 st.success("Marked as posted!")
                 st.rerun()
