@@ -274,7 +274,7 @@ def init_keywords_data() -> list:
 def get_scraped_ids() -> set:
     if not os.path.exists(SCRAPED_ID_FILE):
         return set()
-    with open(SCRAPED_ID_FILE, "r", encoding="utf-8") as f:
+    with open(SCRAPED_ID_FILE, "r", encoding="utf-8-sig") as f:  # utf-8-sig strips BOM if present
         return set(json.load(f))
 
 def mark_scraped_ids(ids):
