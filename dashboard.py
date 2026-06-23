@@ -1882,19 +1882,21 @@ elif page == "Media Lab":
                         _edited = st.text_area(
                             "post_copy",
                             value=_clean_text,
-                            height=155,
+                            height=120,
                             key=f"ml_txt_{_mrid}",
                             label_visibility="collapsed",
-                            help="Copy this and paste into Reddit when you open the post form",
+                            help="Edit here, then use the copy button below to copy to clipboard",
                         )
                         if _edited != _clean_text:
                             hf.update_entry(_mrid, {"reddit_text": _edited})
+                        # ── Copy block with built-in 📋 button ───────────────
                         st.markdown(
-                            '<div style="color:var(--c-t3);font-size:11px;margin-top:4px">'
-                            'Edit freely — copy all and paste into Reddit</div>',
+                            '<div style="color:var(--c-t3);font-size:10px;margin:6px 0 2px">'
+                            'Click 📋 on the right to copy ↓</div>',
                             unsafe_allow_html=True,
                         )
-                        if st.button("Regenerate Copy", key=f"ml_regen_{_mrid}", use_container_width=True):
+                        st.code(_edited if _edited else _clean_text, language=None)
+                        if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
                             with st.spinner("Rewriting…"):
                                 _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
                             if _new_txt.startswith("[Could not"):
