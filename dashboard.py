@@ -1704,22 +1704,34 @@ elif page == "Accounts Manager":
     verified_name    = st.session_state.get("acc_verify_name", "")
 
     if verified_profile and verified_name:
-        created_dt = datetime.utcfromtimestamp(verified_profile["created_utc"])
-        account_age_days = (datetime.utcnow() - created_dt).days
-        age_str = f"{account_age_days // 365}y {account_age_days % 365 // 30}m" if account_age_days > 30 else f"{account_age_days}d"
+        _is_manual = verified_profile.get("_manual", False)
+        border_color = "#f59e0b" if _is_manual else "#10b981"
+        badge_html = (
+            '<span style="background:#f59e0b22;color:#f59e0b;font-size:11px;font-weight:700;'
+            'padding:2px 8px;border-radius:20px">Manually confirmed</span>'
+        ) if _is_manual else (
+            '<span style="background:#10b98122;color:#10b981;font-size:11px;font-weight:700;'
+            'padding:2px 8px;border-radius:20px">Verified via Reddit</span>'
+        )
+        created_utc = verified_profile.get("created_utc", 0)
+        if created_utc:
+            created_dt = datetime.utcfromtimestamp(created_utc)
+            account_age_days = (datetime.utcnow() - created_dt).days
+            age_str = f"{account_age_days // 365}y {account_age_days % 365 // 30}m" if account_age_days > 30 else f"{account_age_days}d"
+        else:
+            age_str = "—"
 
         st.markdown(
-            f'<div style="background:var(--c-card);border:2px solid #10b981;border-radius:14px;'
+            f'<div style="background:var(--c-card);border:2px solid {border_color};border-radius:14px;'
             f'padding:20px 24px;margin:12px 0 20px">'
             f'<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap">'
             f'<div style="width:52px;height:52px;background:#FF450022;border:2px solid #FF4500;'
             f'border-radius:50%;display:flex;align-items:center;justify-content:center;'
             f'color:#FF4500;font-size:22px;font-weight:800">{verified_profile["name"][0].upper()}</div>'
             f'<div>'
-            f'<div style="display:flex;align-items:center;gap:8px">'
+            f'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
             f'<span style="color:var(--c-t1);font-size:17px;font-weight:800">u/{verified_profile["name"]}</span>'
-            f'<span style="background:#10b98122;color:#10b981;font-size:11px;font-weight:700;'
-            f'padding:2px 8px;border-radius:20px">Verified</span>'
+            f'{badge_html}'
             f'</div>'
             f'<div style="color:var(--c-t3);font-size:12px;margin-top:2px">Account age: {age_str}</div>'
             f'</div>'
