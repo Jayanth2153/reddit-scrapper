@@ -1607,46 +1607,6 @@ elif page == "Accounts Manager":
 
     import base64 as _b64
 
-    def _fetch_reddit_profile(username: str) -> dict:
-        """Fetch Reddit account data. Returns dict with 'error' key on failure."""
-        _headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                          "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "Accept": "application/json",
-        }
-        urls = [
-            f"https://www.reddit.com/user/{username}/about.json",
-            f"https://old.reddit.com/user/{username}/about.json",
-        ]
-        last_status = None
-        for url in urls:
-            try:
-                r = _requests.get(url, headers=_headers, timeout=10)
-                last_status = r.status_code
-                if r.status_code == 404:
-                    return {"error": "not_found"}
-                if r.status_code == 429:
-                    return {"error": "rate_limit"}
-                if r.status_code in (403, 401):
-                    return {"error": "blocked"}
-                if not r.ok:
-                    continue
-                d = r.json().get("data", {})
-                if not d:
-                    continue
-                return {
-                    "name":          d.get("name", username),
-                    "total_karma":   d.get("total_karma", 0),
-                    "link_karma":    d.get("link_karma", 0),
-                    "comment_karma": d.get("comment_karma", 0),
-                    "created_utc":   d.get("created_utc", 0),
-                    "is_gold":       d.get("is_gold", False),
-                    "verified":      d.get("has_verified_email", False),
-                }
-            except Exception:
-                continue
-        return {"error": "network", "status": last_status}
-
     # ── Step 1: Login prompt ──────────────────────────────────────────────────
     st.markdown(
         '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
