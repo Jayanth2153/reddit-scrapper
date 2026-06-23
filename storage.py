@@ -180,6 +180,15 @@ def mark_post_idea_posted(index: int):
         _save(data)
 
 
+def delete_comment_by_post_id(post_id: str):
+    """Remove all comments for a given post_id and the post itself if no comments remain."""
+    data = _load()
+    data["comments"] = [c for c in data["comments"] if c.get("post_id") != post_id]
+    remaining_ids = {c["post_id"] for c in data["comments"]}
+    data["posts"] = [p for p in data["posts"] if p["id"] in remaining_ids]
+    _save(data)
+
+
 
 # ── Accounts ──────────────────────────────────────────────────────────────────
 
