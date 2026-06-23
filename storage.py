@@ -9,8 +9,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-DB_FILE       = "dashboard_data.json"
-INSIGHTS_FILE = "insights_data.json"
+DB_FILE        = "dashboard_data.json"
+INSIGHTS_FILE  = "insights_data.json"
+SCRAPED_ID_FILE = "scraped_ids.json"
 
 
 def _load() -> dict:
