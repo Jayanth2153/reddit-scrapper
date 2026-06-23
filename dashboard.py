@@ -1892,13 +1892,18 @@ elif page == "Media Lab":
                         )
                         if _edited != _clean_text:
                             hf.update_entry(_mrid, {"reddit_text": _edited})
-                        # ── Copy block with built-in 📋 button ───────────────
-                        st.markdown(
-                            '<div style="color:var(--c-t3);font-size:10px;margin:6px 0 2px">'
-                            'Click 📋 on the right to copy ↓</div>',
-                            unsafe_allow_html=True,
+                        # ── Tiny JS copy button ───────────────────────────────
+                        import json as _json
+                        _cp_text = _json.dumps(_edited if _edited else _clean_text)
+                        _stc.html(
+                            f'<button onclick="navigator.clipboard.writeText({_cp_text})'
+                            f'.then(()=>{{var b=this;b.textContent=\'✓\';b.style.color=\'#10b981\';'
+                            f'setTimeout(()=>{{b.textContent=\'📋\';b.style.color=\'#888\'}},1800)}})"'
+                            f' title="Copy post text" style="background:none;border:1px solid #3a3a4a;'
+                            f'border-radius:6px;padding:3px 9px;cursor:pointer;font-size:15px;'
+                            f'color:#888;line-height:1.4;font-family:inherit">📋</button>',
+                            height=36,
                         )
-                        st.code(_edited if _edited else _clean_text, language=None)
                         if st.button("Regenerate", key=f"ml_regen_{_mrid}", use_container_width=True):
                             with st.spinner("Rewriting…"):
                                 _new_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
