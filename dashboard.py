@@ -473,7 +473,6 @@ data       = get_all()
 insights   = get_insights()
 kw_data    = init_keywords_data()
 accounts   = get_accounts()
-tracker    = get_publishing_tracker()
 all_posts  = data.get("posts", [])
 
 hf         = HiggsFieldClient()
@@ -484,10 +483,10 @@ hf_credits = parse_credits(hf_info)
 
 # Compute pipeline counts
 comments_all   = data.get("comments", [])
-pending_cmts   = [c for c in tracker if not c.get("posted")]
-posted_cmts    = [c for c in tracker if c.get("posted")]
-verified_pass  = [c for c in tracker if c.get("verification_status") == "pass"]
-verified_fail  = [c for c in tracker if c.get("verification_status") == "fail"]
+pending_cmts   = [c for c in comments_all if not c.get("posted")]
+posted_cmts    = [c for c in comments_all if c.get("posted")]
+verified_pass  = [c for c in comments_all if c.get("verification_status") == "pass"]
+verified_fail  = [c for c in comments_all if c.get("verification_status") == "fail"]
 high_intent    = [p for p in insights if intent_score(p) >= 60]
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
