@@ -1601,6 +1601,28 @@ elif page == "Accounts Manager":
     )
 
     with st.expander("+ Add Reddit Account", expanded=False):
+        # ── Step 1: Login to Reddit ───────────────────────────────────────────
+        st.markdown(
+            '<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:10px;'
+            'padding:14px 18px;margin-bottom:18px">'
+            '<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;'
+            'letter-spacing:.08em;margin-bottom:10px">Step 1 — Login to Reddit first</div>'
+            '<div style="color:var(--c-t3);font-size:12px;margin-bottom:12px">'
+            'Open Reddit in a new tab, log in with your account, then come back and fill in the details below.</div>'
+            '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+            '<a href="https://www.reddit.com/login" target="_blank" '
+            'style="background:#FF4500;color:#fff;padding:9px 20px;border-radius:8px;'
+            'font-size:13px;font-weight:700;text-decoration:none">Open Reddit Login</a>'
+            '<a href="https://www.reddit.com/submit" target="_blank" '
+            'style="background:var(--c-b1);color:var(--c-t1);padding:9px 18px;border-radius:8px;'
+            'font-size:13px;font-weight:600;text-decoration:none">Submit a Post</a>'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+        # ── Step 2: Save credentials ─────────────────────────────────────────
+        st.markdown('<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Step 2 — Save account details</div>', unsafe_allow_html=True)
         a1, a2 = st.columns(2)
         new_uname  = a1.text_input("Reddit username", placeholder="u/AptoriOfficial", key="acc_uname")
         new_pwd    = a2.text_input("Reddit password", type="password", placeholder="stored locally only", key="acc_pwd")
@@ -1610,11 +1632,11 @@ elif page == "Accounts Manager":
         a5, a6 = st.columns(2)
         new_tone   = a5.text_input("Tone", "Professional, helpful, technical", key="acc_tone")
         new_email  = a6.text_input("Email (optional)", placeholder="linked email", key="acc_email")
-        new_rules  = st.text_area("Posting rules", "No spammy CTA. Always add value first. Mention Aptori only when relevant.", height=80, key="acc_rules")
+        new_rules  = st.text_area("Posting rules", "No spammy CTA. Always add value first. Mention Aptori only when relevant.", height=70, key="acc_rules")
         new_notes  = st.text_input("Notes", key="acc_notes")
-        st.caption("Credentials stored locally only — never sent anywhere. Use them to log in manually via the button below each account.")
+        st.caption("Credentials stored locally in accounts.json — never sent anywhere.")
 
-        if st.button("Add Account", type="primary", key="acc_add_btn"):
+        if st.button("Save Account", type="primary", key="acc_add_btn"):
             if new_uname.strip():
                 import base64 as _b64
                 _enc_pwd = _b64.b64encode(new_pwd.encode()).decode() if new_pwd else ""
@@ -1627,7 +1649,7 @@ elif page == "Accounts Manager":
                     "status": "active", "last_used": "", "posts_made": 0,
                     "verified_pass": 0, "verified_fail": 0,
                 })
-                st.success(f"Added u/{new_uname.strip()}")
+                st.success(f"Saved u/{new_uname.strip().lstrip('u/')}")
                 time.sleep(0.5)
                 st.rerun()
             else:
