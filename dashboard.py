@@ -1842,17 +1842,18 @@ elif page == "Media Lab":
                         'text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Preview</div>',
                         unsafe_allow_html=True,
                     )
-                    if _murl:
+                    if _msrc:
                         with st.expander("Preview", expanded=True):
                             if _is_img:
-                                st.image(_murl, use_container_width=True)
-                                st.markdown(
-                                    f'<a href="{_murl}" target="_blank" style="font-size:11px;color:#3b82f6">'
-                                    f'Open full image ↗</a>',
-                                    unsafe_allow_html=True,
-                                )
+                                st.image(_msrc, use_container_width=True)
+                                if _murl:
+                                    st.markdown(
+                                        f'<a href="{_murl}" target="_blank" style="font-size:11px;color:#3b82f6">'
+                                        f'Open full image ↗</a>',
+                                        unsafe_allow_html=True,
+                                    )
                             else:
-                                st.video(_murl)
+                                st.video(_msrc)
                     else:
                         st.markdown(
                             '<div style="background:var(--c-row);border:1px dashed var(--c-b2);'
