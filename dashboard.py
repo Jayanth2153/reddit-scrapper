@@ -1290,7 +1290,9 @@ elif page == "Comment Studio":
                 update_comment_by_post_id(pid, {"comment_status": "copied"})
                 st.code(cmt_text, language=None)
 
-            if b2.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
+            b2.link_button("Post This Comment ↗", full_url, use_container_width=True, type="primary")
+
+            if b3.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
                 st.success("Marked as posted!")
                 st.rerun()
