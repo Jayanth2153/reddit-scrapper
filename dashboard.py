@@ -938,15 +938,16 @@ elif page == "Comment Studio":
     show_filter = tb2.selectbox("Filter", ["All", "Not Posted", "Posted", "Pass", "Fail"], key="cs_filter", label_visibility="collapsed")
 
     if run_scraper:
-        with st.spinner("Scraping Reddit and generating comments with Claude — this takes ~2 minutes..."):
+        with st.spinner("Syncing keywords and generating comments with Claude — this takes ~2 minutes..."):
             try:
+                sync_keywords_to_file()
                 result = subprocess.run(
                     ["python", "run_daily.py"],
                     cwd=str(Path.cwd()),
                     capture_output=True, text=True, timeout=300
                 )
                 if result.returncode == 0:
-                    st.success("Done! Scroll down to see your 10 fresh posts.")
+                    st.success("Done! Scroll down to see your fresh posts.")
                     st.rerun()
                 else:
                     st.error(f"Scraper error:\n{result.stderr[-800:]}")
