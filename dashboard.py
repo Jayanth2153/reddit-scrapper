@@ -1872,10 +1872,10 @@ elif page == "Media Lab":
                         'text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Preview</div>',
                         unsafe_allow_html=True,
                     )
-                    if _msrc:
+                    if _msrc or _murl:
                         with st.expander("Preview", expanded=True):
                             if _is_img:
-                                st.image(_msrc, use_container_width=True)
+                                st.image(_msrc or _murl, use_container_width=True)
                                 if _murl:
                                     st.markdown(
                                         f'<a href="{_murl}" target="_blank" style="font-size:11px;color:#3b82f6">'
@@ -1883,7 +1883,15 @@ elif page == "Media Lab":
                                         unsafe_allow_html=True,
                                     )
                             else:
-                                st.video(_msrc)
+                                # prefer URL for video (browser handles streaming natively)
+                                _vid_src = _murl if _murl else _msrc
+                                if _vid_src:
+                                    st.video(_vid_src)
+                                else:
+                                    st.markdown(
+                                        '<div style="color:var(--c-t3);font-size:12px;text-align:center;padding:16px">No video source available</div>',
+                                        unsafe_allow_html=True,
+                                    )
                     else:
                         st.markdown(
                             '<div style="background:var(--c-row);border:1px dashed var(--c-b2);'
