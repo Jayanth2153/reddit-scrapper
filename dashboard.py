@@ -733,69 +733,133 @@ elif page == "Keyword Monitor":
 # PAGE 3 — POST DISCOVERY
 # =============================================================================
 elif page == "Post Discovery":
-    st.markdown(section_header("Post Discovery", "Browse and filter scraped Reddit posts by intent score, subreddit, and keyword"), unsafe_allow_html=True)
+    st.markdown(section_header("Post Discovery", "Fresh Reddit posts discovered by keyword — fetch new posts, review, send to Comment Studio"), unsafe_allow_html=True)
 
-    col_f, col_main = st.columns([1, 3])
+    # ── Toolbar ──────────────────────────────────────────────────────────────
+    tb1, tb2, tb3 = st.columns([2, 2, 4])
+    run_discovery = tb1.button("Fetch Fresh Posts Now", type="primary", use_container_width=True, key="pd_run")
+    age_filter    = tb2.selectbox(
+        "Age", ["Last 6 hours", "Last 24 hours", "Last 3 days", "All time"],
+        index=1, key="pd_age", label_visibility="collapsed",
+    )
 
-    with col_f:
-        st.markdown('<div style="color:var(--c-t2);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Filters</div>', unsafe_allow_html=True)
-        subreddits = sorted({p.get("subreddit","") for p in insights if p.get("subreddit")})
-        sel_sub    = st.selectbox("Subreddit", ["All"] + subreddits, key="disc_sub")
-        keywords   = sorted({p.get("keyword","") for p in insights if p.get("keyword")})
-        sel_kw     = st.selectbox("Keyword", ["All"] + keywords, key="disc_kw")
-        min_score  = st.slider("Min intent score", 0, 99, 0, key="disc_intent")
-        sel_status = st.selectbox("Comment status", ["All","No comment","Has comment"], key="disc_status")
-
-    with col_main:
-        filtered = insights
-        if sel_sub  != "All":   filtered = [p for p in filtered if p.get("subreddit","") == sel_sub]
-        if sel_kw   != "All":   filtered = [p for p in filtered if p.get("keyword","") == sel_kw]
-        filtered = [p for p in filtered if intent_score(p) >= min_score]
-        commented_ids = {c.get("post_id") for c in comments_all}
-        if sel_status == "No comment":  filtered = [p for p in filtered if p.get("id") not in commented_ids]
-        if sel_status == "Has comment": filtered = [p for p in filtered if p.get("id") in commented_ids]
-        filtered = sorted(filtered, key=intent_score, reverse=True)
-
-        st.caption(f"{len(filtered)} posts found")
-
-        for p in filtered[:40]:
-            isc       = intent_score(p)
-            has_cmt   = p.get("id") in commented_ids
-            score_clr = "#10b981" if isc >= 75 else "#f59e0b" if isc >= 50 else "#ef4444"
-
-            with st.expander(
-                f"r/{p.get('subreddit','')}  ·  {p.get('title','')[:65]}",
-                expanded=False,
-            ):
-                c1, c2 = st.columns([3, 1])
-                with c1:
-                    st.markdown(
-                        f'<div style="color:var(--c-t1);font-weight:600;font-size:15px;margin-bottom:8px">{p.get("title","")}</div>'
-                        f'<div style="display:flex;gap:16px;color:var(--c-t2);font-size:13px;margin-bottom:10px">'
-                        f'<span>r/{p.get("subreddit","")}</span>'
-                        f'<span>↑ {p.get("score",0)}</span>'
-                        f'<span>💬 {p.get("num_comments",0)}</span>'
-                        f'<span>Keyword: <b style="color:var(--c-link)">{p.get("keyword","")}</b></span>'
-                        f'</div>'
-                        f'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-                        f'{badge(f"Intent {isc}%", "active" if isc >= 60 else "posted" if isc >= 40 else "draft")}'
-                        f'{badge("Reply Ready","ready") if has_cmt else badge("No Reply","draft")}'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
-                    if p.get("selftext"):
-                        st.caption(p["selftext"][:200] + "…")
-                with c2:
-                    st.markdown(f'<div style="color:{score_clr};font-size:36px;font-weight:800;text-align:center">{isc}%</div><div style="color:var(--c-t2);font-size:11px;text-align:center">Intent Score</div>', unsafe_allow_html=True)
-
-                b1, b2, b3 = st.columns(3)
-                b1.markdown(f'<a href="{p.get("permalink","#")}" target="_blank" style="display:block;background:var(--c-input);border:1px solid var(--c-iborder);border-radius:8px;padding:8px;text-align:center;color:var(--c-t1);font-size:13px;font-weight:500;text-decoration:none">Open Reddit</a>', unsafe_allow_html=True)
-                if b2.button("Comment Studio", key=f"disc_studio_{p.get('id','')}", use_container_width=True):
-                    st.session_state["sidebar_nav"] = "Comment Studio"
-                    st.session_state["studio_post_id"] = p.get("id", "")
+    if run_discovery:
+        with st.spinner("Fetching fresh posts from Reddit with all keywords — takes ~2 min..."):
+            try:
+                result = subprocess.run(
+                    ["python", "run_daily.py"],
+                    cwd=str(Path.cwd()),
+                    capture_output=True, text=True, timeout=300,
+                )
+                if result.returncode == 0:
+                    st.success("Done! Scroll down to see fresh posts.")
                     st.rerun()
-                hc = p.get("top_comments", [])
-                b3.caption(f"{len(hc)} human comment{'s' if len(hc)!=1 else ''}")
+                else:
+                    st.error(f"Scraper error:\n{result.stderr[-600:]}")
+            except subprocess.TimeoutExpired:
+                st.error("Timed out — Reddit may be rate-limiting. Try again in a few minutes.")
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+    # ── Filter by age ─────────────────────────────────────────────────────────
+    age_hours_map = {"Last 6 hours": 6, "Last 24 hours": 24, "Last 3 days": 72, "All time": 99999}
+    max_hours = age_hours_map.get(age_filter, 24)
+    now_utc = datetime.utcnow()
+
+    def _post_age_h(p):
+        ts = p.get("scraped_at", "")
+        if not ts:
+            return 99999
+        try:
+            dt = datetime.fromisoformat(ts.rstrip("Z"))
+            return (now_utc - dt).total_seconds() / 3600
+        except Exception:
+            return 99999
+
+    fresh = [p for p in insights if _post_age_h(p) <= max_hours]
+    fresh = sorted(fresh, key=lambda p: p.get("scraped_at", ""), reverse=True)
+
+    # ── Keyword filter ────────────────────────────────────────────────────────
+    kws_present = sorted({p.get("keyword", "") for p in fresh if p.get("keyword")})
+    if kws_present:
+        sel_kw_pd = st.selectbox("Filter by keyword", ["All keywords"] + kws_present, key="pd_kw")
+        if sel_kw_pd != "All keywords":
+            fresh = [p for p in fresh if p.get("keyword") == sel_kw_pd]
+
+    # ── Keyword coverage badges ───────────────────────────────────────────────
+    if fresh:
+        kw_counts: dict = {}
+        for p in fresh:
+            k = p.get("keyword", "—")
+            kw_counts[k] = kw_counts.get(k, 0) + 1
+        badges_html = " ".join(
+            f'<span style="background:var(--c-b1);color:var(--c-link);font-size:11px;'
+            f'font-weight:600;padding:3px 10px;border-radius:20px">'
+            f'{kw} <span style="color:var(--c-t3)">({n})</span></span>'
+            for kw, n in sorted(kw_counts.items(), key=lambda x: -x[1])
+        )
+        st.markdown(
+            f'<div style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px">{badges_html}</div>',
+            unsafe_allow_html=True,
+        )
+
+    commented_ids_pd = {c.get("post_id") for c in comments_all}
+    st.caption(f"{len(fresh)} fresh posts")
+
+    if not fresh:
+        st.markdown(
+            '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
+            'padding:48px;text-align:center;margin-top:20px">'
+            '<div style="font-size:36px;margin-bottom:12px">🔍</div>'
+            '<div style="color:var(--c-t1);font-size:16px;font-weight:600;margin-bottom:8px">No fresh posts yet</div>'
+            '<div style="color:var(--c-t3);font-size:13px">Click <b>Fetch Fresh Posts Now</b> above to search Reddit using all your keywords.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        for p in fresh:
+            pid       = p.get("id", "")
+            has_cmt   = pid in commented_ids_pd
+            kw        = p.get("keyword", "")
+            sub       = p.get("subreddit", "")
+            link      = p.get("permalink", "#")
+            full_url  = link if link.startswith("http") else f"https://reddit.com{link}"
+            ts_raw    = p.get("scraped_at", "")
+            try:
+                age_h = _post_age_h(p)
+                age_label = f"{int(age_h)}h ago" if age_h < 48 else f"{int(age_h/24)}d ago"
+            except Exception:
+                age_label = ""
+
+            st.markdown(
+                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;'
+                f'padding:16px 20px;margin-bottom:12px">'
+                f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">'
+                f'<div style="flex:1;min-width:0">'
+                f'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">'
+                f'<span style="color:var(--c-link);font-size:12px;font-weight:600">r/{sub}</span>'
+                f'<span style="color:var(--c-t3);font-size:11px">↑ {p.get("score",0)}</span>'
+                f'<span style="color:var(--c-t3);font-size:11px">💬 {p.get("num_comments",0)}</span>'
+                f'<span style="background:var(--c-b1);color:var(--c-t2);font-size:10px;padding:2px 7px;border-radius:4px">{kw}</span>'
+                f'<span style="color:var(--c-t3);font-size:10px">{age_label}</span>'
+                f'{"<span style=\'background:#10b98122;color:#10b981;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600\'>Comment Ready</span>" if has_cmt else ""}'
+                f'</div>'
+                f'<div style="color:var(--c-t1);font-size:14px;font-weight:600;line-height:1.4">{p.get("title","")}</div>'
+                f'{"<div style=\\"color:var(--c-t3);font-size:12px;margin-top:6px;line-height:1.5\\">" + p["selftext"][:160] + "…</div>" if p.get("selftext") else ""}'
+                f'</div></div>',
+                unsafe_allow_html=True,
+            )
+            ba1, ba2 = st.columns([1, 5])
+            ba1.markdown(
+                f'<a href="{full_url}" target="_blank" style="display:block;background:#E63946;color:#fff;'
+                f'padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;text-align:center">Open Reddit</a>',
+                unsafe_allow_html=True,
+            )
+            if ba2.button("Send to Comment Studio", key=f"pd_studio_{pid}", use_container_width=False):
+                st.session_state["sidebar_nav"] = "Comment Studio"
+                st.session_state["studio_post_id"] = pid
+                st.rerun()
+            st.markdown('<hr style="border-color:var(--c-b1);margin:4px 0 8px">', unsafe_allow_html=True)
 
 # =============================================================================
 # PAGE 4 — HUMAN INSIGHTS
