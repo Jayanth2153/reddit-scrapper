@@ -1957,8 +1957,11 @@ elif page == "Media Lab":
                         unsafe_allow_html=True,
                     )
 
-                # ── Footer status row ────────────────────────────────────────
-                st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+                # ── Separator + footer status row ────────────────────────────
+                st.markdown(
+                    '<hr style="border:none;border-top:1px solid var(--c-b1);margin:14px 0 10px">',
+                    unsafe_allow_html=True,
+                )
                 _sf1, _sf2, _sf3, _sf4 = st.columns([3, 2, 2, 2])
 
                 with _sf1:
