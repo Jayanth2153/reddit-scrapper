@@ -1736,15 +1736,19 @@ elif page == "Accounts Manager":
             f'<div style="color:var(--c-t3);font-size:12px;margin-top:2px">Account age: {age_str}</div>'
             f'</div>'
             f'</div>'
-            f'<div style="display:flex;gap:20px;flex-wrap:wrap">'
-            f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Total Karma</div>'
-            f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["total_karma"]:,}</div></div>'
-            f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Post Karma</div>'
-            f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["link_karma"]:,}</div></div>'
-            f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Comment Karma</div>'
-            f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["comment_karma"]:,}</div></div>'
-            f'</div>'
-            f'</div>',
+            + (
+                f'<div style="display:flex;gap:20px;flex-wrap:wrap">'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Total Karma</div>'
+                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["total_karma"]:,}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Post Karma</div>'
+                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["link_karma"]:,}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Comment Karma</div>'
+                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{verified_profile["comment_karma"]:,}</div></div>'
+                f'</div>'
+                if not _is_manual else
+                f'<div style="color:var(--c-t3);font-size:12px">Karma will not be available — Reddit blocked the lookup. Account saved by manual confirmation.</div>'
+            )
+            + f'</div>',
             unsafe_allow_html=True,
         )
 
