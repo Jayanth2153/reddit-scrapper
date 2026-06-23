@@ -1504,10 +1504,18 @@ elif page == "Content Studio":
                     st.error(res["error"])
                 else:
                     st.success(f"Video generated — {res['credits']} credits used.")
+                    with st.spinner("Writing Reddit post text…"):
+                        _vreddit_text = generate_reddit_post_text(vid_prompt, vid_topic, "video")
+                    hf.update_entry(res["request_id"], {"reddit_text": _vreddit_text})
                     if res.get("url"):
-                        st.video(res["url"])
-                        st.code(res["url"], language=None)
-                        st.caption("Download this video and upload it to Reddit as a video post.")
+                        rv1, rv2 = st.columns([2, 3])
+                        with rv1:
+                            st.video(res["url"])
+                            st.caption(f"{vid_ar} · {duration}s · {_vmeta.get('name','')}")
+                        with rv2:
+                            st.markdown('<div style="color:var(--c-t3);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Generated Reddit Post</div>', unsafe_allow_html=True)
+                            st.text_area("Reddit post text", value=_vreddit_text, height=160, key="cs_vid_reddit_text_result", label_visibility="collapsed")
+                            st.caption("Copy the text above → paste as your Reddit post caption.")
                     st.rerun()
 
     # =========================================================================
