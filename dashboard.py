@@ -1615,6 +1615,8 @@ elif page == "Content Studio":
             st.markdown('<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Prompt</div>', unsafe_allow_html=True)
             quick_v = st.selectbox("Quick video prompt", ["— write custom prompt —"] + APTORI_VID_PROMPTS, key="cs_vid_quick", label_visibility="collapsed")
             _vprompt_def = "" if quick_v == "— write custom prompt —" else quick_v
+            if "_pre_cs_vid_prompt" in st.session_state:
+                st.session_state["cs_vid_prompt"] = st.session_state.pop("_pre_cs_vid_prompt")
             vid_prompt = st.text_area(
                 "Video prompt",
                 value=_vprompt_def,
