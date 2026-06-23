@@ -1271,20 +1271,29 @@ elif page == "Comment Studio":
                 f'</div>'
 
                 # ── Comment body ──
-                f'<div style="padding:14px 20px 4px;border-bottom:1px solid var(--c-b1)">'
+                f'<div style="padding:14px 20px 12px;border-bottom:1px solid var(--c-b1)">'
                 f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-                f'letter-spacing:.1em;margin-bottom:8px">Claude-Generated Comment '
-                f'<span style="font-weight:400;text-transform:none;letter-spacing:0">· click the copy icon →</span></div>'
+                f'letter-spacing:.1em;margin-bottom:8px">Claude-Generated Comment</div>'
+                f'<div style="background:var(--c-row);border-radius:10px;padding:14px 16px;'
+                f'font-size:13px;line-height:1.75;color:var(--c-t1b);white-space:pre-wrap">{cmt_text}</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
 
-            # always-visible code block with native Streamlit copy icon
-            st.code(cmt_text, language=None)
-
             # ── Action buttons ──
+            import base64 as _cs_b64mod
+            _cs_cp_b64 = _cs_b64mod.b64encode(cmt_text.encode()).decode()
             b1, b2, b3, b4, b5, b6 = st.columns([2, 2, 1, 1, 2, 1])
+            with b1:
+                st.markdown(
+                    f'<button class="ml-copy-btn" data-b64="{_cs_cp_b64}" '
+                    f'style="width:100%;background:transparent;border:1px solid rgba(250,250,250,0.2);'
+                    f'border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#fafafa;'
+                    f'font-family:inherit;font-weight:500;line-height:1.5;'
+                    f'transition:border-color .15s,color .15s">Copy Comment</button>',
+                    unsafe_allow_html=True,
+                )
 
             b1.link_button(
                 "Post This Comment ↗",
