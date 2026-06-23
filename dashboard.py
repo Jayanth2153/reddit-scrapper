@@ -1286,13 +1286,13 @@ elif page == "Comment Studio":
             # ── Action buttons ──
             b1, b2, b3, b4, b5, b6, b7 = st.columns(7)
 
-            if b1.button("Copy Comment", key=f"cs_copy_{pid}", type="primary", use_container_width=True):
+            if b1.button("Copy", key=f"cs_copy_{pid}", type="primary", use_container_width=True):
                 update_comment_by_post_id(pid, {"comment_status": "copied"})
                 st.code(cmt_text, language=None)
 
-            b2.link_button("Post This Comment ↗", full_url, use_container_width=True, type="primary")
+            b2.link_button("Post ↗", full_url, use_container_width=True, type="primary")
 
-            if b3.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
+            if b3.button("Mark Posted", key=f"cs_post_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
                 st.success("Marked as posted!")
                 st.rerun()
@@ -1311,7 +1311,7 @@ elif page == "Comment Studio":
                 })
                 st.rerun()
 
-            if b6.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
+            if b6.button("Regen", key=f"cs_regen_{pid}", use_container_width=True):
                 post_for_regen = insight_map.get(pid, {
                     "id": pid, "title": item["title"], "selftext": "",
                     "permalink": item["permalink"], "subreddit": item["subreddit"],
