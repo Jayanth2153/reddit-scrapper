@@ -1445,6 +1445,8 @@ elif page == "Content Studio":
             st.markdown('<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Prompt</div>', unsafe_allow_html=True)
             quick = st.selectbox("Quick Aptori prompt", ["— write custom prompt —"] + APTORI_IMG_PROMPTS, key="cs_img_quick", label_visibility="collapsed")
             _prompt_default = "" if quick == "— write custom prompt —" else quick
+            if "_pre_cs_img_prompt" in st.session_state:
+                st.session_state["cs_img_prompt"] = st.session_state.pop("_pre_cs_img_prompt")
             prompt = st.text_area(
                 "Post image prompt",
                 value=st.session_state.get("cs_img_prompt", _prompt_default) or _prompt_default,
