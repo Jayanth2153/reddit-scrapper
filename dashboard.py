@@ -765,6 +765,7 @@ elif page == "Keyword Monitor":
                 new_st = "paused" if st_ == "active" else "active"
                 kw_data_fresh[idx]["status"] = new_st
                 save_keywords_data(kw_data_fresh)
+                sync_keywords_to_file()
                 st.rerun()
         st.markdown('<hr style="margin:4px 0;border-color:#1e2d45">', unsafe_allow_html=True)
 
