@@ -1962,7 +1962,7 @@ elif page == "Media Lab":
                                 if _new_txt.startswith("[Could not"):
                                     st.error(_new_txt)
                                 else:
-                                    hf.update_entry(_mrid, {"reddit_text": _new_txt})
+                                    st.session_state[f"_pending_txt_{_mrid}"] = _new_txt
                                     st.rerun()
                     else:
                         st.markdown(
