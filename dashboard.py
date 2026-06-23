@@ -1841,7 +1841,7 @@ elif page == "Media Lab":
                         unsafe_allow_html=True,
                     )
                     if _murl:
-                        with st.expander("View media", expanded=False):
+                        with st.expander("Preview", expanded=True):
                             if _is_img:
                                 st.image(_murl, use_container_width=True)
                                 st.markdown(
