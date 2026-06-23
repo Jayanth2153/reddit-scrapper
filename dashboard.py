@@ -1730,12 +1730,12 @@ elif page == "Content Studio":
                     )
                     _ic1, _ic2 = st.columns(2)
                     if _ic1.button("Use as Image Prompt", key=f"idea_img_{p.get('id','')}"):
-                        st.session_state["cs_img_prompt"] = _sug_img
-                        st.session_state["sidebar_nav"]   = "Content Studio"
+                        st.session_state["_pre_cs_img_prompt"] = _sug_img
+                        st.session_state["sidebar_nav"]        = "Content Studio"
                         st.rerun()
                     if _ic2.button("Use as Video Prompt", key=f"idea_vid_{p.get('id','')}"):
-                        st.session_state["cs_vid_prompt"] = _sug_vid
-                        st.session_state["sidebar_nav"]   = "Content Studio"
+                        st.session_state["_pre_cs_vid_prompt"] = _sug_vid
+                        st.session_state["sidebar_nav"]        = "Content Studio"
                         st.rerun()
 
 # =============================================================================
