@@ -1647,43 +1647,75 @@ elif page == "Accounts Manager":
             lu     = acc.get("last_used","") or "Never"
 
             with st.expander(f"u/{uname}  ·  {role}  ·  {badge(status_a, status_a)}", expanded=False):
-                ca, cb, cc, cd = st.columns(4)
-                ca.markdown(metric_card("Posts Made",    pm, "",    "#3b82f6"), unsafe_allow_html=True)
-                cb.markdown(metric_card("Verified Pass", vp, "",    "#10b981"), unsafe_allow_html=True)
-                cc.markdown(metric_card("Risk Level",    risk, "",  "#f59e0b"), unsafe_allow_html=True)
-                cd.markdown(metric_card("Last Used",     lu[:10], "", "#7c3aed"), unsafe_allow_html=True)
-
-                st.markdown("---")
-
-                # Credentials + quick login link
-                _reddit_login_url = f"https://www.reddit.com/login"
-                _reddit_profile_url = f"https://www.reddit.com/user/{uname}"
                 import base64 as _b64
-                _stored_pwd = acc.get("password","")
-                _has_pwd = bool(_stored_pwd)
+                _stored_pwd_b64 = acc.get("password", "")
+                _plain_pwd = _b64.b64decode(_stored_pwd_b64).decode() if _stored_pwd_b64 else ""
+                _has_pwd = bool(_plain_pwd)
+
+                # ── Reddit login panel ────────────────────────────────────────
                 st.markdown(
-                    f'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">'
-                    f'<div style="color:var(--c-t2);font-size:12px">u/{uname}</div>'
-                    f'{"<div style=\'color:var(--c-t3);font-size:11px\'>Password saved</div>" if _has_pwd else "<div style=\'color:var(--c-t3);font-size:11px\'>No password stored</div>"}'
-                    f'<a href="{_reddit_login_url}" target="_blank" style="background:var(--c-b1);color:var(--c-link);'
-                    f'padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Login to Reddit</a>'
-                    f'<a href="{_reddit_profile_url}" target="_blank" style="color:var(--c-t3);font-size:11px;text-decoration:underline">View Profile</a>'
+                    f'<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:12px;'
+                    f'padding:16px 20px;margin-bottom:16px">'
+                    f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
+                    f'letter-spacing:.1em;margin-bottom:12px">Reddit Login</div>'
+                    f'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">'
+                    f'<div>'
+                    f'<div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">USERNAME</div>'
+                    f'<div style="color:var(--c-t1);font-size:14px;font-weight:700">u/{uname}</div>'
+                    f'</div>'
+                    f'<div>'
+                    f'<div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">PASSWORD</div>'
+                    f'<div style="color:var(--c-t1);font-size:14px;font-weight:700">{"••••••••" if _has_pwd else "—"}</div>'
+                    f'</div>'
+                    f'{"<div><div style=\\"color:var(--c-t3);font-size:10px;margin-bottom:2px\\">EMAIL</div><div style=\\"color:var(--c-t2);font-size:13px\\">" + acc.get("email","") + "</div></div>" if acc.get("email") else ""}'
+                    f'</div>'
+                    f'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+                    f'<a href="https://www.reddit.com/login" target="_blank" '
+                    f'style="background:#FF4500;color:#fff;padding:8px 18px;border-radius:8px;'
+                    f'font-size:13px;font-weight:700;text-decoration:none">Open Reddit Login</a>'
+                    f'<a href="https://www.reddit.com/user/{uname}" target="_blank" '
+                    f'style="background:var(--c-b1);color:var(--c-link);padding:8px 16px;border-radius:8px;'
+                    f'font-size:13px;font-weight:600;text-decoration:none">View Profile</a>'
+                    f'<a href="https://www.reddit.com/submit" target="_blank" '
+                    f'style="background:var(--c-b1);color:var(--c-t2);padding:8px 16px;border-radius:8px;'
+                    f'font-size:13px;font-weight:600;text-decoration:none">Submit Post</a>'
+                    f'</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
+
+                # Show credentials to copy (reveal password for login)
+                if _has_pwd:
+                    if st.button("Show credentials to copy", key=f"acc_show_{uname}"):
+                        st.session_state[f"show_creds_{uname}"] = True
+                    if st.session_state.get(f"show_creds_{uname}"):
+                        cr1, cr2 = st.columns(2)
+                        cr1.text_input("Username", value=uname, key=f"acc_cu_{uname}", disabled=True)
+                        cr2.text_input("Password", value=_plain_pwd, key=f"acc_cp_{uname}", type="default")
+                        st.caption("Copy these into the Reddit login form above. Click away to hide.")
+                        if st.button("Hide", key=f"acc_hide_{uname}"):
+                            st.session_state[f"show_creds_{uname}"] = False
+                            st.rerun()
+
+                # ── Stats ─────────────────────────────────────────────────────
+                ca, cb, cc, cd = st.columns(4)
+                ca.markdown(metric_card("Posts Made",    pm,      "", "#3b82f6"), unsafe_allow_html=True)
+                cb.markdown(metric_card("Verified Pass", vp,      "", "#10b981"), unsafe_allow_html=True)
+                cc.markdown(metric_card("Risk Level",    risk,    "", "#f59e0b"), unsafe_allow_html=True)
+                cd.markdown(metric_card("Last Used",     lu[:10], "", "#7c3aed"), unsafe_allow_html=True)
+
+                st.markdown("---")
                 st.markdown(f'**Tone:** {acc.get("tone","")}')
                 st.markdown(f'**Posting rules:** {acc.get("rules","")}')
-                if acc.get("email"):
-                    st.caption(f'Email: {acc["email"]}')
                 if acc.get("notes"):
                     st.caption(f'Notes: {acc["notes"]}')
 
-                col_p, col_q, col_d = st.columns([1, 1, 3])
+                col_p, col_d = st.columns([1, 4])
                 toggle_lbl = "Pause" if status_a == "active" else "Resume"
                 if col_p.button(toggle_lbl, key=f"acc_tog_{uname}"):
                     update_account(uname, {"status": "paused" if status_a == "active" else "active"})
                     st.rerun()
-                if col_q.button("Delete Account", key=f"acc_del_{uname}"):
+                if col_d.button("Delete Account", key=f"acc_del_{uname}"):
                     delete_account(uname)
                     st.rerun()
 
