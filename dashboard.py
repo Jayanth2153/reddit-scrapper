@@ -1511,8 +1511,10 @@ elif page == "Content Studio":
                 with st.spinner(f"Generating with {_meta.get('name','model')} — {_meta.get('speed','~45s')}…"):
                     res = hf.generate_image(prompt=prompt, model=model_id, aspect_ratio=aspect, quality=quality, topic=topic)
                 if "error" in res:
+                    st.toast(f"Image generation failed: {res['error']}", icon="❌")
                     st.error(res["error"])
                 else:
+                    st.toast(f"Image generated — {res['credits']} credits used. Check Media Lab!", icon="✅")
                     st.success(f"Post image generated — {res['credits']} credits used.")
                     with st.spinner("Writing Reddit post text…"):
                         _reddit_text = generate_reddit_post_text(prompt, topic, "image")
