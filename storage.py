@@ -26,49 +26,98 @@ def _save(data: dict):
 
 
 def save_results(results: List[dict]):
+    """Save only posts that had a comment generated — skipped posts are not stored."""
     data = _load()
+    cleanup_old_data(data)
     ts = datetime.utcnow().isoformat()
+
     for r in results:
-        post = r["post"]
+        post       = r["post"]
         suggestion = r.get("suggestion") or {}
 
-        post_entry = {
-            "id":               post.id if hasattr(post, "id") else post.get("id"),
-            "title":            post.title if hasattr(post, "title") else post.get("title"),
-            "subreddit":        str(post.subreddit) if hasattr(post, "subreddit") else post.get("subreddit"),
-            "score":            post.score if hasattr(post, "score") else post.get("score", 0),
-            "num_comments":     post.num_comments if hasattr(post, "num_comments") else post.get("num_comments", 0),
-            "upvote_ratio":     post.upvote_ratio if hasattr(post, "upvote_ratio") else post.get("upvote_ratio", 0),
-            "engagement_score": post.engagement_score if hasattr(post, "engagement_score") else post.get("engagement_score", 0),
-            "permalink":        post.permalink if hasattr(post, "permalink") else post.get("permalink", ""),
-            "author":           str(post.author) if hasattr(post, "author") else post.get("author", ""),
-            "scraped_at":       ts,
-            "status":           "commented" if suggestion else "skipped",
-        }
+        if not suggestion:
+            continue  # don't store posts that weren't commented on
 
+        post_id = post.id if hasattr(post, "id") else post.get("id")
         existing_ids = {p["id"] for p in data["posts"]}
-        if post_entry["id"] not in existing_ids:
-            data["posts"].append(post_entry)
+        if post_id not in existing_ids:
+            data["posts"].append({
+                "id":               post_id,
+                "title":            post.title if hasattr(post, "title") else post.get("title"),
+                "subreddit":        str(post.subreddit) if hasattr(post, "subreddit") else post.get("subreddit"),
+                "score":            post.score if hasattr(post, "score") else post.get("score", 0),
+                "num_comments":     post.num_comments if hasattr(post, "num_comments") else post.get("num_comments", 0),
+                "upvote_ratio":     post.upvote_ratio if hasattr(post, "upvote_ratio") else post.get("upvote_ratio", 0),
+                "engagement_score": post.engagement_score if hasattr(post, "engagement_score") else post.get("engagement_score", 0),
+                "permalink":        post.permalink if hasattr(post, "permalink") else post.get("permalink", ""),
+                "author":           str(post.author) if hasattr(post, "author") else post.get("author", ""),
+                "scraped_at":       ts,
+                "status":           "commented",
+            })
 
-        if suggestion:
-            comment_entry = {
-                "post_id":              post_entry["id"],
-                "post_title":           post_entry["title"],
-                "subreddit":            post_entry["subreddit"],
-                "permalink":            post_entry["permalink"],
-                "comment":              suggestion.get("comment", ""),
-                "strategy":             suggestion.get("strategy", ""),
-                "tone":                 suggestion.get("tone", ""),
-                "estimated_engagement": suggestion.get("estimated_engagement", "medium"),
-                "aptori_relevance":     suggestion.get("aptori_relevance", ""),
-                "best_time_to_post":    suggestion.get("best_time_to_post", ""),
-                "keyword":              getattr(post, "keyword", "") if hasattr(post, "keyword") else "",
-                "generated_at":         ts,
-                "posted":               False,
-            }
-            data["comments"].append(comment_entry)
+        data["comments"].append({
+            "post_id":              post_id,
+            "post_title":           post.title if hasattr(post, "title") else post.get("title"),
+            "subreddit":            str(post.subreddit) if hasattr(post, "subreddit") else post.get("subreddit"),
+            "permalink":            post.permalink if hasattr(post, "permalink") else post.get("permalink", ""),
+            "comment":              suggestion.get("comment", ""),
+            "strategy":             suggestion.get("strategy", ""),
+            "tone":                 suggestion.get("tone", ""),
+            "estimated_engagement": suggestion.get("estimated_engagement", "medium"),
+            "aptori_relevance":     suggestion.get("aptori_relevance", ""),
+            "best_time_to_post":    suggestion.get("best_time_to_post", ""),
+            "keyword":              getattr(post, "keyword", "") if hasattr(post, "keyword") else "",
+            "generated_at":         ts,
+            "posted":               False,
+        })
 
     _save(data)
+
+
+def cleanup_old_data(data: dict = None, max_age_days: int = 7):
+    """
+    Remove posts and comments older than max_age_days.
+    Also removes any posts that have no matching comment (orphaned scrapes).
+    Pass an existing data dict to mutate in-place, or call standalone to load+save.
+    """
+    standalone = data is None
+    if standalone:
+        data = _load()
+
+    cutoff = datetime.utcnow().timestamp() - (max_age_days * 86400)
+
+    # Keep only comments within the age window
+    data["comments"] = [
+        c for c in data.get("comments", [])
+        if _parse_iso(c.get("generated_at", "")) >= cutoff
+    ]
+
+    # Keep only posts that have at least one surviving comment
+    kept_post_ids = {c["post_id"] for c in data["comments"]}
+    data["posts"] = [
+        p for p in data.get("posts", [])
+        if p["id"] in kept_post_ids
+    ]
+
+    if standalone:
+        _save(data)
+
+
+def _parse_iso(ts: str) -> float:
+    try:
+        return datetime.fromisoformat(ts).timestamp()
+    except Exception:
+        return 0.0
+
+
+def get_today_commented_count() -> int:
+    """Return how many comment-backed posts have been saved today."""
+    data = _load()
+    today = datetime.utcnow().date().isoformat()
+    return sum(
+        1 for c in data.get("comments", [])
+        if c.get("generated_at", "").startswith(today)
+    )
 
 
 def save_post_idea(subreddit: str, topic: str, idea: dict):
