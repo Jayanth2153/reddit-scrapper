@@ -466,17 +466,11 @@ class HiggsFieldClient:
         except Exception:
             pass
 
-        local_path = ""
-        if result_url:
-            dest = _local_path_for(request_id, result_url)
-            if _download_media(result_url, dest):
-                local_path = dest
-
         self._log.append({
             "type": "video", "model": model, "topic": topic,
             "prompt": prompt[:120], "credits": credits, "duration": duration,
             "request_id": request_id, "status": "completed",
-            "result_url": result_url, "local_path": local_path,
+            "result_url": result_url, "local_path": "",
             "created_at": datetime.utcnow().isoformat(),
             "reddit_text": "", "posted": False, "result": "",
         })
