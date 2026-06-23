@@ -1761,7 +1761,8 @@ elif page == "Accounts Manager":
             save_risk  = sf3.selectbox("Risk", ["Low","Medium","High"], key="acc_save_risk")
             save_notes = sf4.text_input("Notes (optional)", key="acc_save_notes")
             st.caption("Password stored locally in accounts.json — never sent anywhere.")
-            submitted = st.form_submit_button("Save Account", type="primary")
+            _btn_label = "Save without verify" if _is_manual else "Save Account"
+            submitted = st.form_submit_button(_btn_label, type="primary")
 
         if submitted:
             existing_names = [a.get("username","") for a in get_accounts()]
