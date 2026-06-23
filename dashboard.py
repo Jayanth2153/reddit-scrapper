@@ -1012,11 +1012,6 @@ elif page == "Comment Studio":
 
             if b2.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
-                # also update in comments list
-                for ci, c in enumerate(data_cs.get("comments",[])):
-                    if c.get("post_id") == pid:
-                        mark_comment_posted(ci)
-                        break
                 st.success("Marked as posted!")
                 st.rerun()
 
