@@ -492,27 +492,35 @@ def generate_comment_for_post(post_dict: dict) -> dict | None:
 
 
 def generate_reddit_post_text(prompt: str, topic: str, media_type: str) -> str:
-    """Call Claude to write a human-sounding Reddit post caption for a generated image or video."""
+    """Call Claude to write a human-sounding Reddit post for a generated image or video."""
     import anthropic as _ant
     try:
         client = _ant.Anthropic(api_key=anthropic_cfg.api_key)
         system = (
-            "You are a real person sharing content on Reddit. "
-            "Write like a normal community member — casual, genuine, NOT a marketer. "
-            "No buzzwords, no exclamation spam, no AI-sounding phrases like 'I wanted to share' or 'excited to announce'. "
-            "Sound like you typed this quickly on your phone."
+            "You write Reddit posts as a real engineer who works in tech. "
+            "Rules you never break:\n"
+            "1. Write like you're typing fast on a laptop, not publishing a press release.\n"
+            "2. Use 'I', 'we', 'our team' — first person, specific experiences.\n"
+            "3. Vary sentence length. Short punchy sentences mixed with longer ones.\n"
+            "4. ONE concrete detail or observation — a number, a problem, a comparison.\n"
+            "5. Never start with: 'I wanted to share', 'excited to', 'just', 'hey everyone'.\n"
+            "6. No em-dashes, no bullet points, no bold text.\n"
+            "7. No hashtags. No 'feel free to'. No 'let me know your thoughts'.\n"
+            "8. Sound mildly opinionated — like someone who actually uses this stuff at work.\n"
+            "9. Title should be a plain statement or question, not a marketing headline.\n"
+            "10. Max 3 sentences in the body."
         )
         user_msg = (
-            f"I just generated a {media_type} about: {prompt}\n"
-            f"Topic/context: {topic}\n\n"
-            "Write a short Reddit post to go with this. "
-            "2-4 sentences. Conversational. "
-            "Include a title line (prefixed 'Title:') then a blank line then the post body. "
-            "No hashtags, no emojis unless they fit naturally, no 'check this out' energy."
+            f"Write a Reddit post for a {media_type} about: {prompt}\n"
+            f"Context / product: {topic}\n\n"
+            "Output format — two parts separated by a blank line:\n"
+            "Title: <plain statement or question, no hype>\n"
+            "\n"
+            "<2-3 sentence body, conversational, grounded in a real work scenario>"
         )
         resp = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=300,
+            max_tokens=320,
             system=system,
             messages=[{"role": "user", "content": user_msg}],
         )
