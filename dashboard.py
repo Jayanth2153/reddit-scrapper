@@ -1343,7 +1343,7 @@ elif page == "Comment Studio":
                     st.session_state["_pre_cs_img_prompt"] = (
                         f"Create a professional post image for this Reddit topic: {_cs_prompt_hint}"
                     )
-                    st.session_state["cs_topic"] = _cs_topic_hint
+                    st.session_state["cs_img_topic"] = _cs_topic_hint
                     st.session_state["_pre_sidebar_nav"] = "Content Studio"
                     st.rerun()
                 if _gi_col2.button("Generate Video for Post", key=f"cs_genvid_{pid}", use_container_width=True, disabled=not hf_ready):
