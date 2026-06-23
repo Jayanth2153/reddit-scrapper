@@ -683,6 +683,72 @@ with st.sidebar:
     if st.button("Refresh Data", use_container_width=True, key="sidebar_refresh"):
         st.rerun()
 
+# ── Floating sidebar reopen button (injected via JS) ─────────────────────────
+st.markdown("""
+<script>
+(function() {
+    function injectToggleBtn() {
+        if (document.getElementById('sb-reopen-btn')) return;
+
+        var btn = document.createElement('button');
+        btn.id = 'sb-reopen-btn';
+        btn.innerHTML = '&#8250;';
+        btn.title = 'Open sidebar';
+        btn.style.cssText = [
+            'position:fixed',
+            'top:50%',
+            'left:0',
+            'transform:translateY(-50%)',
+            'width:26px',
+            'height:64px',
+            'background:#E63946',
+            'color:#fff',
+            'border:none',
+            'border-radius:0 12px 12px 0',
+            'cursor:pointer',
+            'z-index:999999',
+            'font-size:22px',
+            'font-weight:700',
+            'line-height:1',
+            'display:none',
+            'align-items:center',
+            'justify-content:center',
+            'box-shadow:3px 0 12px rgba(0,0,0,0.35)',
+            'transition:width .15s,background .15s',
+            'padding:0',
+        ].join(';');
+
+        btn.onmouseenter = function() { btn.style.width = '34px'; };
+        btn.onmouseleave = function() { btn.style.width = '26px'; };
+
+        btn.onclick = function() {
+            var native =
+                document.querySelector('[data-testid="collapsedControl"] button') ||
+                document.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                document.querySelector('button[aria-label="Open sidebar"]') ||
+                document.querySelector('button[aria-label="Show sidebar"]');
+            if (native) { native.click(); }
+        };
+
+        document.body.appendChild(btn);
+    }
+
+    function updateToggleBtn() {
+        injectToggleBtn();
+        var btn = document.getElementById('sb-reopen-btn');
+        if (!btn) return;
+        var sidebar = document.querySelector('[data-testid="stSidebar"]');
+        var collapsed = !sidebar || sidebar.getAttribute('aria-expanded') === 'false';
+        btn.style.display = collapsed ? 'flex' : 'none';
+    }
+
+    // Poll every 300ms to react to sidebar state changes
+    setInterval(updateToggleBtn, 300);
+    updateToggleBtn();
+})();
+</script>
+""", unsafe_allow_html=True)
+
 # =============================================================================
 # PAGE 1 — DASHBOARD (OVERVIEW)
 # =============================================================================
