@@ -1678,9 +1678,24 @@ elif page == "Accounts Manager":
         clean = verify_input.strip().lstrip("u/")
         with st.spinner(f"Looking up u/{clean} on Reddit..."):
             profile = _fetch_reddit_profile(clean)
-        if profile is None:
-            st.error(f"u/{clean} not found on Reddit. Check the username and try again.")
-        else:
+        err = profile.get("error") if isinstance(profile, dict) else None
+        if err == "not_found":
+            st.error(f"u/{clean} doesn't exist on Reddit — double-check the spelling.")
+        elif err == "rate_limit":
+            st.warning("Reddit is rate-limiting right now. Wait 30 seconds and try again.")
+        elif err in ("blocked", "network"):
+            # Reddit blocked the request — let user manually confirm and skip API check
+            st.warning(
+                f"Reddit blocked the lookup (this happens sometimes). "
+                f"If you're sure u/{clean} is correct and you're logged in, click **Save without verify** below."
+            )
+            st.session_state["acc_verify_name"] = clean
+            st.session_state["acc_verified_profile"] = {
+                "name": clean, "total_karma": 0, "link_karma": 0,
+                "comment_karma": 0, "created_utc": 0,
+                "is_gold": False, "verified": False, "_manual": True,
+            }
+        elif not err:
             st.session_state["acc_verified_profile"] = profile
             st.session_state["acc_verify_name"] = clean
 
