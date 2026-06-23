@@ -1653,6 +1653,10 @@ elif page == "Accounts Manager":
                 _has_pwd = bool(_plain_pwd)
 
                 # ── Reddit login panel ────────────────────────────────────────
+                _email_block = (
+                    f'<div><div style="color:var(--c-t3);font-size:10px;margin-bottom:2px">EMAIL</div>'
+                    f'<div style="color:var(--c-t2);font-size:13px">{acc.get("email","")}</div></div>'
+                ) if acc.get("email") else ""
                 st.markdown(
                     f'<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:12px;'
                     f'padding:16px 20px;margin-bottom:16px">'
