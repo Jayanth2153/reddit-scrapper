@@ -519,7 +519,7 @@ NAV_ITEMS = [
     "Comment Studio",
     "Content Studio",
     "Higgsfield Credits",
-    "Accounts Manager",
+    "Account Roster",
     "Settings",
 ]
 
@@ -1602,7 +1602,7 @@ elif page == "Higgsfield Credits":
 # =============================================================================
 # PAGE 9 — ACCOUNTS MANAGER
 # =============================================================================
-elif page == "Accounts Manager":
+elif page == "Account Roster":
     st.markdown(section_header("Account Roster", "Track your Reddit accounts — all posting is done manually"), unsafe_allow_html=True)
 
     # ── Add account ───────────────────────────────────────────────────────────
