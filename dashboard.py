@@ -1668,17 +1668,36 @@ elif page == "Accounts Manager":
                 cd.markdown(metric_card("Last Used",     lu[:10], "", "#7c3aed"), unsafe_allow_html=True)
 
                 st.markdown("---")
+
+                # Credentials + quick login link
+                _reddit_login_url = f"https://www.reddit.com/login"
+                _reddit_profile_url = f"https://www.reddit.com/user/{uname}"
+                import base64 as _b64
+                _stored_pwd = acc.get("password","")
+                _has_pwd = bool(_stored_pwd)
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">'
+                    f'<div style="color:var(--c-t2);font-size:12px">u/{uname}</div>'
+                    f'{"<div style=\'color:var(--c-t3);font-size:11px\'>Password saved</div>" if _has_pwd else "<div style=\'color:var(--c-t3);font-size:11px\'>No password stored</div>"}'
+                    f'<a href="{_reddit_login_url}" target="_blank" style="background:var(--c-b1);color:var(--c-link);'
+                    f'padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">Login to Reddit</a>'
+                    f'<a href="{_reddit_profile_url}" target="_blank" style="color:var(--c-t3);font-size:11px;text-decoration:underline">View Profile</a>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
                 st.markdown(f'**Tone:** {acc.get("tone","")}')
                 st.markdown(f'**Posting rules:** {acc.get("rules","")}')
+                if acc.get("email"):
+                    st.caption(f'Email: {acc["email"]}')
                 if acc.get("notes"):
                     st.caption(f'Notes: {acc["notes"]}')
 
-                col_p, col_d = st.columns([1, 4])
+                col_p, col_q, col_d = st.columns([1, 1, 3])
                 toggle_lbl = "Pause" if status_a == "active" else "Resume"
                 if col_p.button(toggle_lbl, key=f"acc_tog_{uname}"):
                     update_account(uname, {"status": "paused" if status_a == "active" else "active"})
                     st.rerun()
-                if col_d.button("Delete Account", key=f"acc_del_{uname}"):
+                if col_q.button("Delete Account", key=f"acc_del_{uname}"):
                     delete_account(uname)
                     st.rerun()
 
