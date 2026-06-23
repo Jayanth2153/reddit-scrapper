@@ -1600,20 +1600,42 @@ elif page == "Accounts Manager":
         unsafe_allow_html=True,
     )
 
+    # ── Aptori login quick-link ───────────────────────────────────────────────
+    st.markdown(
+        '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;'
+        'padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'
+        '<div>'
+        '<div style="color:var(--c-t1);font-weight:600;font-size:14px;margin-bottom:2px">Aptori Platform</div>'
+        '<div style="color:var(--c-t3);font-size:12px">Log in to Aptori to manage API security testing</div>'
+        '</div>'
+        '<a href="https://app.aptori.dev" target="_blank" style="background:#E63946;color:#fff;padding:8px 18px;'
+        'border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap">Login to Aptori</a>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
     with st.expander("+ Add Reddit Account", expanded=False):
         a1, a2 = st.columns(2)
         new_uname  = a1.text_input("Reddit username", placeholder="u/AptoriOfficial", key="acc_uname")
-        new_role   = a2.selectbox("Role", ["Brand","Founder","Thought Leadership","Community","Personal"], key="acc_role")
+        new_pwd    = a2.text_input("Reddit password", type="password", placeholder="stored locally only", key="acc_pwd")
         a3, a4 = st.columns(2)
-        new_tone   = a3.text_input("Tone", "Professional, helpful, technical", key="acc_tone")
+        new_role   = a3.selectbox("Role", ["Brand","Founder","Thought Leadership","Community","Personal"], key="acc_role")
         new_risk   = a4.selectbox("Risk level", ["Low","Medium","High"], key="acc_risk")
+        a5, a6 = st.columns(2)
+        new_tone   = a5.text_input("Tone", "Professional, helpful, technical", key="acc_tone")
+        new_email  = a6.text_input("Email (optional)", placeholder="linked email", key="acc_email")
         new_rules  = st.text_area("Posting rules", "No spammy CTA. Always add value first. Mention Aptori only when relevant.", height=80, key="acc_rules")
         new_notes  = st.text_input("Notes", key="acc_notes")
+        st.caption("Password is stored locally in accounts.json — never sent anywhere. Manual posting only.")
 
         if st.button("Add Account", type="primary", key="acc_add_btn"):
             if new_uname.strip():
+                import base64 as _b64
+                _enc_pwd = _b64.b64encode(new_pwd.encode()).decode() if new_pwd else ""
                 add_account({
-                    "username": new_uname.strip().lstrip("u/"),
+                    "username":   new_uname.strip().lstrip("u/"),
+                    "password":   _enc_pwd,
+                    "email":      new_email.strip(),
                     "role": new_role, "tone": new_tone, "risk": new_risk,
                     "rules": new_rules, "notes": new_notes,
                     "status": "active", "last_used": "", "posts_made": 0,
