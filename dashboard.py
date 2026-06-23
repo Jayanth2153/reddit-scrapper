@@ -1579,7 +1579,7 @@ elif page == "Content Studio":
 # PAGE 8 — MEDIA LAB
 # =============================================================================
 elif page == "Media Lab":
-    st.markdown(section_header("Media Lab", "Generated images and videos with Reddit-ready post copy"), unsafe_allow_html=True)
+    st.markdown(section_header("Media Lab", "Your generated images and videos with Reddit post copy"), unsafe_allow_html=True)
 
     _ml_hist    = hf.credit_history()
     _ml_imgs    = [e for e in _ml_hist if e.get("type","").lower() in ("image","text_to_image","img")]
@@ -1587,13 +1587,12 @@ elif page == "Media Lab":
     _ml_posted  = len([e for e in _ml_hist if e.get("posted", False)])
     _ml_pending = len(_ml_hist) - _ml_posted
 
-    # ── KPI strip ────────────────────────────────────────────────────────────
-    ml_c1, ml_c2, ml_c3, ml_c4, ml_c5 = st.columns(5)
-    ml_c1.markdown(metric_card("Credits Left",     hf_credits or "—",         "from your plan",    "#10b981"), unsafe_allow_html=True)
-    ml_c2.markdown(metric_card("Used Today",        hf.credits_used_today(),   "resets midnight",   "#f59e0b"), unsafe_allow_html=True)
-    ml_c3.markdown(metric_card("Images",            len(_ml_imgs),             "all time",          "#3b82f6"), unsafe_allow_html=True)
-    ml_c4.markdown(metric_card("Videos",            len(_ml_vids),             "all time",          "#7c3aed"), unsafe_allow_html=True)
-    ml_c5.markdown(metric_card("Posted",            _ml_posted,                f"{_ml_pending} pending", "#10b981"), unsafe_allow_html=True)
+    # ── KPI strip (counts only, no credits) ──────────────────────────────────
+    ml_c1, ml_c2, ml_c3, ml_c4 = st.columns(4)
+    ml_c1.markdown(metric_card("Total Generated", len(_ml_hist),   "all time",          "#7c3aed"), unsafe_allow_html=True)
+    ml_c2.markdown(metric_card("Images",           len(_ml_imgs),  "all time",          "#3b82f6"), unsafe_allow_html=True)
+    ml_c3.markdown(metric_card("Videos",           len(_ml_vids),  "all time",          "#E63946"), unsafe_allow_html=True)
+    ml_c4.markdown(metric_card("Posted",           _ml_posted,     f"{_ml_pending} pending", "#10b981"), unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1603,35 +1602,31 @@ elif page == "Media Lab":
             'padding:60px;text-align:center">'
             '<div style="font-size:48px;margin-bottom:16px">🎨</div>'
             '<div style="color:var(--c-t1);font-size:17px;font-weight:700;margin-bottom:8px">No generated content yet</div>'
-            '<div style="color:var(--c-t3);font-size:13px;max-width:360px;margin:0 auto">Go to <b>Content Studio</b> to generate an image or video — '
-            'it will appear here with an AI-written Reddit post ready to copy.</div>'
+            '<div style="color:var(--c-t3);font-size:13px;max-width:360px;margin:0 auto">'
+            'Go to <b>Content Studio</b> to generate an image or video — it will appear here with a Reddit post ready to copy.</div>'
             '</div>',
             unsafe_allow_html=True,
         )
     else:
         # ── Filter bar ───────────────────────────────────────────────────────
-        ml_fa, ml_fb, ml_fc = st.columns([2, 2, 4])
-        _ml_type_filter   = ml_fa.radio("Type", ["All", "Images", "Videos"], horizontal=True, key="ml_type_f")
-        _ml_status_filter = ml_fb.radio("Status", ["All", "Pending", "Posted"], horizontal=True, key="ml_status_f")
+        ml_fa, ml_fb, _ = st.columns([2, 2, 4])
+        _ml_type_f   = ml_fa.radio("Type",   ["All", "Images", "Videos"],    horizontal=True, key="ml_type_f")
+        _ml_status_f = ml_fb.radio("Status", ["All", "Pending", "Posted"],   horizontal=True, key="ml_status_f")
 
-        _ml_show = {
-            "All":    _ml_hist,
-            "Images": _ml_imgs,
-            "Videos": _ml_vids,
-        }[_ml_type_filter]
-        if _ml_status_filter == "Pending":
+        _ml_show = {"All": _ml_hist, "Images": _ml_imgs, "Videos": _ml_vids}[_ml_type_f]
+        if _ml_status_f == "Pending":
             _ml_show = [e for e in _ml_show if not e.get("posted", False)]
-        elif _ml_status_filter == "Posted":
+        elif _ml_status_f == "Posted":
             _ml_show = [e for e in _ml_show if e.get("posted", False)]
 
         st.markdown(
-            f'<div style="color:var(--c-t3);font-size:12px;margin:4px 0 16px">'
-            f'Showing {len(_ml_show)} of {len(_ml_hist)} generations</div>',
+            f'<div style="color:var(--c-t3);font-size:12px;margin:4px 0 18px">'
+            f'Showing {len(_ml_show)} of {len(_ml_hist)}</div>',
             unsafe_allow_html=True,
         )
 
         for _midx, _me in enumerate(_ml_show):
-            _mrid     = _me.get("request_id", "") or f"ml_{_midx}"
+            _mrid     = _me.get("request_id") or f"ml_{_midx}"
             _mtype    = _me.get("type", "image")
             _murl     = _me.get("result_url", "")
             _mprompt  = _me.get("prompt", "")
@@ -1643,108 +1638,101 @@ elif page == "Media Lab":
             _mtopic   = _me.get("topic", "") or "Aptori"
             _mdur     = _me.get("duration", "")
 
-            _type_label = "Image" if _mtype == "image" else "Video"
-            _type_color = "#3b82f6" if _mtype == "image" else "#7c3aed"
+            _type_lbl   = "Image" if _mtype == "image" else "Video"
+            _type_clr   = "#3b82f6" if _mtype == "image" else "#7c3aed"
             _status_bg  = "#10b98122" if _mposted else "#f59e0b22"
-            _status_col = "#10b981"   if _mposted else "#f59e0b"
+            _status_clr = "#10b981"   if _mposted else "#f59e0b"
             _status_lbl = "Posted"    if _mposted else "Pending"
+            _dur_note   = f" · {_mdur}s" if _mdur else ""
 
-            # ── Card ─────────────────────────────────────────────────────────
+            # ── Card header ──────────────────────────────────────────────────
             st.markdown(
-                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:16px;'
-                f'overflow:hidden;margin-bottom:20px">'
-
-                # Card header
-                f'<div style="padding:14px 20px;border-bottom:1px solid var(--c-b1);'
-                f'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
-                f'<div style="display:flex;align-items:center;gap:10px;min-width:0">'
-                f'<span style="background:{_type_color}22;color:{_type_color};font-size:10px;font-weight:700;'
-                f'padding:3px 10px;border-radius:20px;white-space:nowrap">{_type_label}</span>'
-                f'<span style="color:var(--c-t1);font-size:13px;font-weight:600;overflow:hidden;'
-                f'text-overflow:ellipsis;white-space:nowrap">{_mprompt[:72]}{"…" if len(_mprompt)>72 else ""}</span>'
+                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);'
+                f'border-radius:14px 14px 0 0;padding:13px 18px;'
+                f'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;'
+                f'border-bottom:1px solid var(--c-b1)">'
+                f'<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">'
+                f'<span style="background:{_type_clr}22;color:{_type_clr};font-size:10px;font-weight:700;'
+                f'padding:3px 10px;border-radius:20px;white-space:nowrap">{_type_lbl}</span>'
+                f'<span style="color:var(--c-t1);font-size:13px;font-weight:600;'
+                f'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:480px">'
+                f'{_mprompt[:80]}{"…" if len(_mprompt)>80 else ""}</span>'
                 f'</div>'
-                f'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">'
-                f'<span style="background:{_status_bg};color:{_status_col};font-size:11px;font-weight:700;'
+                f'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+                f'<span style="background:{_status_bg};color:{_status_clr};font-size:11px;font-weight:700;'
                 f'padding:3px 10px;border-radius:20px">{_status_lbl}</span>'
-                f'<span style="color:var(--c-t3);font-size:11px">{_mmodel}</span>'
+                f'<span style="color:var(--c-t3);font-size:11px">{_mmodel}{_dur_note}</span>'
                 f'<span style="color:#f59e0b;font-size:11px;font-weight:700">{_mcredits} cr</span>'
                 f'<span style="color:var(--c-t3);font-size:11px">{_mdate}</span>'
-                f'</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
 
-            # ── Body: media left, post text right ────────────────────────────
-            _body_l, _body_r = st.columns([2, 3], gap="medium")
+            # ── Card body: two columns inside a background wrapper ───────────
+            st.markdown(
+                '<div style="background:var(--c-card);border:1px solid var(--c-b1);'
+                'border-top:none;border-radius:0 0 14px 14px;padding:16px 18px 18px">',
+                unsafe_allow_html=True,
+            )
 
-            with _body_l:
-                st.markdown('<div style="padding:12px 0 0 4px">', unsafe_allow_html=True)
+            _col_media, _col_text = st.columns([2, 3], gap="large")
+
+            with _col_media:
                 if _murl:
                     if _mtype == "image":
                         st.image(_murl, use_container_width=True)
                     else:
                         st.video(_murl)
-                        if _mdur:
-                            st.caption(f"{_mdur}s clip")
                 else:
                     st.markdown(
-                        '<div style="background:var(--c-row);border:1px dashed var(--c-b1);border-radius:10px;'
-                        'padding:40px;text-align:center;color:var(--c-t3);font-size:12px">'
+                        '<div style="background:var(--c-row);border:1px dashed var(--c-b2);border-radius:10px;'
+                        'padding:48px 16px;text-align:center;color:var(--c-t3);font-size:12px">'
                         'No preview available</div>',
                         unsafe_allow_html=True,
                     )
-                # Meta pills
-                _dur_pill = f' · {_mdur}s' if _mdur else ''
                 st.markdown(
                     f'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'
-                    f'<span style="background:var(--c-row);color:var(--c-t3);font-size:10px;'
-                    f'padding:2px 8px;border-radius:6px">{_mmodel}{_dur_pill}</span>'
-                    f'<span style="background:var(--c-row);color:#f59e0b;font-size:10px;font-weight:700;'
-                    f'padding:2px 8px;border-radius:6px">{_mcredits} credits</span>'
-                    f'<span style="background:var(--c-row);color:var(--c-t3);font-size:10px;'
-                    f'padding:2px 8px;border-radius:6px">{_mtopic}</span>'
+                    f'<span style="background:var(--c-b1);color:var(--c-t3);font-size:10px;padding:2px 8px;border-radius:6px">{_mmodel}{_dur_note}</span>'
+                    f'<span style="background:var(--c-b1);color:#f59e0b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">{_mcredits} cr</span>'
+                    f'<span style="background:var(--c-b1);color:var(--c-t3);font-size:10px;padding:2px 8px;border-radius:6px">{_mtopic}</span>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-                st.markdown('</div>', unsafe_allow_html=True)
 
-            with _body_r:
-                st.markdown('<div style="padding:12px 4px 0 0">', unsafe_allow_html=True)
+            with _col_text:
                 st.markdown(
                     '<div style="color:var(--c-t3);font-size:10px;font-weight:700;'
-                    'text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Reddit Post Copy</div>',
+                    'text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Reddit Post Text</div>',
                     unsafe_allow_html=True,
                 )
-
                 if _mtext:
                     _edited = st.text_area(
-                        "Reddit post copy",
+                        "Reddit post text",
                         value=_mtext,
-                        height=200,
+                        height=195,
                         key=f"ml_txt_{_mrid}",
                         label_visibility="collapsed",
-                        help="Edit if needed, then copy and paste into Reddit",
+                        help="Edit freely — copy the whole thing and paste into Reddit",
                     )
                     if _edited != _mtext:
                         hf.update_entry(_mrid, {"reddit_text": _edited})
                 else:
                     st.markdown(
-                        '<div style="background:var(--c-row);border:1px dashed var(--c-b1);border-radius:10px;'
-                        'padding:24px;text-align:center;color:var(--c-t3);font-size:12px;margin-bottom:10px">'
-                        'No Reddit post copy yet — click Generate below</div>',
+                        '<div style="background:var(--c-row);border:1px dashed var(--c-b2);border-radius:10px;'
+                        'padding:20px;text-align:center;color:var(--c-t3);font-size:12px;margin-bottom:10px">'
+                        'No post text yet</div>',
                         unsafe_allow_html=True,
                     )
-                    if st.button("Generate Post Copy", key=f"ml_gen_{_mrid}", type="primary", use_container_width=True):
-                        with st.spinner("Writing human Reddit post…"):
+                    if st.button("Write Reddit Post", key=f"ml_gen_{_mrid}", type="primary", use_container_width=True):
+                        with st.spinner("Writing post…"):
                             _gen_txt = generate_reddit_post_text(_mprompt, _mtopic, _mtype)
                         hf.update_entry(_mrid, {"reddit_text": _gen_txt})
                         st.rerun()
 
-                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
 
-                # Action row
-                _ac1, _ac2, _ac3 = st.columns([2, 2, 1])
+                _ac1, _ac2, _ac3 = st.columns([5, 4, 2])
                 if _ac1.button(
                     "Mark as Posted" if not _mposted else "Unmark Posted",
                     key=f"ml_post_{_mrid}",
@@ -1755,19 +1743,17 @@ elif page == "Media Lab":
                     st.rerun()
                 if _murl:
                     _ac2.markdown(
-                        f'<a href="{_murl}" target="_blank" '
-                        f'style="display:block;background:var(--c-b1);color:var(--c-t1);padding:8px 12px;'
-                        f'border-radius:8px;text-align:center;font-size:13px;font-weight:600;'
-                        f'text-decoration:none;box-sizing:border-box">Download ↗</a>',
+                        f'<a href="{_murl}" target="_blank" style="display:block;background:var(--c-b1);'
+                        f'color:var(--c-t1);padding:8px 10px;border-radius:8px;text-align:center;'
+                        f'font-size:13px;font-weight:600;text-decoration:none">Download ↗</a>',
                         unsafe_allow_html=True,
                     )
                 if _ac3.button("Remove", key=f"ml_del_{_mrid}", use_container_width=True):
                     hf.delete_entry(_mrid)
                     st.rerun()
 
-                st.markdown('</div>', unsafe_allow_html=True)
-
-            st.markdown('<div style="margin-bottom:6px"></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
 
 # =============================================================================
 # PAGE 9 — ACCOUNTS MANAGER
