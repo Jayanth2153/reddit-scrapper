@@ -490,6 +490,37 @@ def generate_comment_for_post(post_dict: dict) -> dict | None:
     gen = ClaudeCommentGenerator(anthropic_cfg, rm)
     return gen.generate_comment(post_obj, scraper_cfg.domain, scraper_cfg.your_expertise)
 
+
+def generate_reddit_post_text(prompt: str, topic: str, media_type: str) -> str:
+    """Call Claude to write a human-sounding Reddit post caption for a generated image or video."""
+    import anthropic as _ant
+    try:
+        client = _ant.Anthropic(api_key=anthropic_cfg.api_key)
+        system = (
+            "You are a real person sharing content on Reddit. "
+            "Write like a normal community member — casual, genuine, NOT a marketer. "
+            "No buzzwords, no exclamation spam, no AI-sounding phrases like 'I wanted to share' or 'excited to announce'. "
+            "Sound like you typed this quickly on your phone."
+        )
+        user_msg = (
+            f"I just generated a {media_type} about: {prompt}\n"
+            f"Topic/context: {topic}\n\n"
+            "Write a short Reddit post to go with this. "
+            "2-4 sentences. Conversational. "
+            "Include a title line (prefixed 'Title:') then a blank line then the post body. "
+            "No hashtags, no emojis unless they fit naturally, no 'check this out' energy."
+        )
+        resp = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=300,
+            system=system,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        return resp.content[0].text.strip()
+    except Exception as e:
+        return f"[Could not generate post text: {e}]"
+
+
 # ── Data load ─────────────────────────────────────────────────────────────────
 data       = get_all()
 insights   = get_insights()
