@@ -1271,56 +1271,45 @@ elif page == "Comment Studio":
                 f'</div>'
 
                 # ── Comment body ──
-                f'<div style="padding:14px 20px 12px;border-bottom:1px solid var(--c-b1)">'
+                f'<div style="padding:16px 20px;border-bottom:1px solid var(--c-b1)">'
                 f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-                f'letter-spacing:.1em;margin-bottom:8px">Claude-Generated Comment</div>'
+                f'letter-spacing:.1em;margin-bottom:10px">Claude-Generated Comment</div>'
                 f'<div style="background:var(--c-row);border-radius:10px;padding:14px 16px;'
                 f'font-size:13px;line-height:1.75;color:var(--c-t1b);white-space:pre-wrap">{cmt_text}</div>'
+                f'<div style="color:var(--c-t3);font-size:11px;margin-top:8px">'
+                f'{len(cmt_text)} chars · {len(cmt_text.split())} words</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
 
             # ── Action buttons ──
-            import base64 as _cs_b64mod
-            _cs_cp_b64 = _cs_b64mod.b64encode(cmt_text.encode()).decode()
             b1, b2, b3, b4, b5, b6 = st.columns([2, 2, 1, 1, 2, 1])
-            with b1:
-                st.markdown(
-                    f'<button class="ml-copy-btn" data-b64="{_cs_cp_b64}" '
-                    f'style="width:100%;background:transparent;border:1px solid rgba(250,250,250,0.2);'
-                    f'border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#fafafa;'
-                    f'font-family:inherit;font-weight:500;line-height:1.5;'
-                    f'transition:border-color .15s,color .15s">Copy Comment</button>',
-                    unsafe_allow_html=True,
-                )
 
-            b2.link_button(
-                "Post This Comment ↗",
-                full_url,
-                use_container_width=True,
-                type="primary",
-            )
+            if b1.button("Copy Comment", key=f"cs_copy_{pid}", type="primary", use_container_width=True):
+                update_comment_by_post_id(pid, {"comment_status": "copied"})
+                st.code(cmt_text, language=None)
 
-            if b4.button("Pass", key=f"cs_pass_{pid}", use_container_width=True):
+            if b2.button("Mark as Posted", key=f"cs_post_{pid}", use_container_width=True):
+                update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
+                st.success("Marked as posted!")
+                st.rerun()
+
+            if b3.button("Pass", key=f"cs_pass_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {
                     "verification_status": "pass",
                     "verified_at": datetime.utcnow().isoformat(),
                 })
                 st.rerun()
 
-            if b5.button("Fail", key=f"cs_fail_{pid}", use_container_width=True):
+            if b4.button("Fail", key=f"cs_fail_{pid}", use_container_width=True):
                 update_comment_by_post_id(pid, {
                     "verification_status": "fail",
                     "verified_at": datetime.utcnow().isoformat(),
                 })
                 st.rerun()
 
-            if b3.button("Mark Posted", key=f"cs_post_{pid}", use_container_width=True):
-                update_comment_by_post_id(pid, {"posted": True, "comment_status": "posted"})
-                st.rerun()
-
-            if b6.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
+            if b5.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
                 post_for_regen = insight_map.get(pid, {
                     "id": pid, "title": item["title"], "selftext": "",
                     "permalink": item["permalink"], "subreddit": item["subreddit"],
@@ -1344,36 +1333,10 @@ elif page == "Comment Studio":
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-            _rem_col, _ = st.columns([1, 5])
-            if _rem_col.button("Remove", key=f"cs_remove_{pid}", use_container_width=True,
-                               help="Delete this comment — frees slot for a new post"):
+            if b6.button("Remove", key=f"cs_remove_{pid}", use_container_width=True,
+                         help="Delete this comment — frees slot for a new post"):
                 delete_comment_by_post_id(pid)
                 st.rerun()
-
-            # ── Generate image for this post → Content Studio ────────────────
-            with st.expander("Generate image / video for this post"):
-                _cs_prompt_hint = item["title"][:120]
-                _cs_topic_hint  = f"r/{item['subreddit']} — {item['keyword']}" if item["keyword"] else f"r/{item['subreddit']}"
-                st.markdown(
-                    f'<div style="color:var(--c-t3);font-size:11px;margin-bottom:6px">'
-                    f'Post: <b>{_cs_prompt_hint}</b></div>',
-                    unsafe_allow_html=True,
-                )
-                _gi_col1, _gi_col2 = st.columns(2)
-                if _gi_col1.button("Generate Image for Post", key=f"cs_genimg_{pid}", use_container_width=True, disabled=not hf_ready):
-                    st.session_state["_pre_cs_img_prompt"] = (
-                        f"Create a professional post image for this Reddit topic: {_cs_prompt_hint}"
-                    )
-                    st.session_state["cs_img_topic"] = _cs_topic_hint
-                    st.session_state["_pre_sidebar_nav"] = "Content Studio"
-                    st.rerun()
-                if _gi_col2.button("Generate Video for Post", key=f"cs_genvid_{pid}", use_container_width=True, disabled=not hf_ready):
-                    st.session_state["_pre_cs_vid_prompt"] = (
-                        f"Cinematic video for Reddit post: {_cs_prompt_hint}"
-                    )
-                    st.session_state["cs_vid_topic"] = _cs_topic_hint
-                    st.session_state["_pre_sidebar_nav"] = "Content Studio"
-                    st.rerun()
 
 # =============================================================================
 # PAGE 6 — CONTENT STUDIO (HIGGSFIELD)
