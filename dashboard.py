@@ -1339,13 +1339,16 @@ elif page == "Content Studio":
                     st.error(res["error"])
                 else:
                     st.success(f"Post image generated — {res['credits']} credits used.")
+                    with st.spinner("Writing Reddit post text…"):
+                        _reddit_text = generate_reddit_post_text(prompt, topic, "image")
+                    hf.update_entry(res["request_id"], {"reddit_text": _reddit_text})
                     if res.get("url"):
                         st.markdown("<br>", unsafe_allow_html=True)
-                        ri1, ri2 = st.columns([2, 1])
+                        ri1, ri2 = st.columns([2, 3])
                         ri1.image(res["url"], caption=f"{aspect} · {quality} · {_meta.get('name','')}", use_container_width=True)
                         with ri2:
                             st.markdown(
-                                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;padding:16px">'
+                                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;padding:16px;margin-bottom:12px">'
                                 f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Post Details</div>'
                                 + info_row("Format", f"{aspect}")
                                 + info_row("Quality", quality)
@@ -1354,8 +1357,9 @@ elif page == "Content Studio":
                                 + f'</div>',
                                 unsafe_allow_html=True,
                             )
-                            st.code(res["url"], language=None)
-                            st.caption("Copy URL above to download/share this image.")
+                            st.markdown('<div style="color:var(--c-t3);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Generated Reddit Post</div>', unsafe_allow_html=True)
+                            st.text_area("Reddit post text", value=_reddit_text, height=160, key="cs_img_reddit_text_result", label_visibility="collapsed")
+                            st.caption("Copy the text above → paste as your Reddit post caption.")
                     st.rerun()
 
     # =========================================================================
