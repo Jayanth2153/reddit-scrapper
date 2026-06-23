@@ -1,10 +1,15 @@
 [
   {
-    "id": "acc_default",
     "username": "aptoridemo",
-    "password": "Demo@1234",
-    "active": true,
-    "note": "Primary Aptori account",
-    "added_at": "2026-06-20T14:59:22.331458"
+    "role": "Personal",
+    "tone": "Professional, helpful, technical",
+    "risk": "Low",
+    "rules": "No spammy CTA. Always add value first. Mention Aptori only when relevant.",
+    "notes": "",
+    "status": "active",
+    "last_used": "",
+    "posts_made": 0,
+    "verified_pass": 0,
+    "verified_fail": 0
   }
 ]
