@@ -1300,7 +1300,7 @@ elif page == "Comment Studio":
                 })
                 st.rerun()
 
-            if b5.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
+            if b5.button("Regenerate Comment", key=f"cs_regen_{pid}", use_container_width=True):
                 post_for_regen = insight_map.get(pid, {
                     "id": pid, "title": item["title"], "selftext": "",
                     "permalink": item["permalink"], "subreddit": item["subreddit"],
@@ -1328,6 +1328,31 @@ elif page == "Comment Studio":
                          help="Delete this comment — frees slot for a new post"):
                 delete_comment_by_post_id(pid)
                 st.rerun()
+
+            # ── Generate image for this post → Content Studio ────────────────
+            with st.expander("Generate image / video for this post"):
+                _cs_prompt_hint = item["title"][:120]
+                _cs_topic_hint  = f"r/{item['subreddit']} — {item['keyword']}" if item["keyword"] else f"r/{item['subreddit']}"
+                st.markdown(
+                    f'<div style="color:var(--c-t3);font-size:11px;margin-bottom:6px">'
+                    f'Post: <b>{_cs_prompt_hint}</b></div>',
+                    unsafe_allow_html=True,
+                )
+                _gi_col1, _gi_col2 = st.columns(2)
+                if _gi_col1.button("Generate Image for Post", key=f"cs_genimg_{pid}", use_container_width=True, disabled=not hf_ready):
+                    st.session_state["_pre_cs_img_prompt"] = (
+                        f"Create a professional post image for this Reddit topic: {_cs_prompt_hint}"
+                    )
+                    st.session_state["cs_topic"] = _cs_topic_hint
+                    st.session_state["_pre_sidebar_nav"] = "Content Studio"
+                    st.rerun()
+                if _gi_col2.button("Generate Video for Post", key=f"cs_genvid_{pid}", use_container_width=True, disabled=not hf_ready):
+                    st.session_state["_pre_cs_vid_prompt"] = (
+                        f"Cinematic video for Reddit post: {_cs_prompt_hint}"
+                    )
+                    st.session_state["cs_vid_topic"] = _cs_topic_hint
+                    st.session_state["_pre_sidebar_nav"] = "Content Studio"
+                    st.rerun()
 
 # =============================================================================
 # PAGE 6 — CONTENT STUDIO (HIGGSFIELD)
