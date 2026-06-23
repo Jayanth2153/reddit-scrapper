@@ -320,10 +320,16 @@ class HiggsFieldClient:
                 rid       = entry.get("request_id", "")
                 cur_local = entry.get("local_path", "")
                 cur_url   = entry.get("result_url", "")
-                if cur_url and rid and (not cur_local or not Path(cur_local).exists()):
+                if cur_url and rid and not entry.get("download_failed") and (not cur_local or not Path(cur_local).exists()):
                     dest = _local_path_for(rid, cur_url)
-                    if Path(dest).exists() or _download_media(cur_url, dest):
+                    if Path(dest).exists():
                         entry["local_path"] = dest
+                        changed = True
+                    elif _download_media(cur_url, dest):
+                        entry["local_path"] = dest
+                        changed = True
+                    else:
+                        entry["download_failed"] = True
                         changed = True
             if changed:
                 CREDITS_FILE.write_text(
