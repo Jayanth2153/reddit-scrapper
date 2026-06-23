@@ -1603,129 +1603,159 @@ elif page == "Higgsfield Credits":
 # PAGE 9 — ACCOUNTS MANAGER
 # =============================================================================
 elif page == "Accounts Manager":
-    st.markdown(section_header("Accounts Manager", "Manage Reddit accounts used for manual engagement — no automation"), unsafe_allow_html=True)
+    st.markdown(section_header("Accounts Manager", "Connect Reddit accounts — login via Reddit, confirm, and manage all accounts"), unsafe_allow_html=True)
 
+    import base64 as _b64
+
+    # ── Connect new account panel ─────────────────────────────────────────────
     st.markdown(
-        '<div style="background:var(--c-card);border:1px solid var(--c-b2);border-left:3px solid #f59e0b;'
-        'border-radius:10px;padding:14px 18px;margin-bottom:20px">'
-        '<div style="color:#f59e0b;font-weight:700;margin-bottom:4px">Manual posting only</div>'
-        '<div style="color:var(--c-t1b);font-size:13px">All posting is done manually by you. No automation touches Reddit accounts. '
-        'These account profiles are for your reference and tracking only.</div>'
+        '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
+        'padding:24px;margin-bottom:24px">'
+        '<div style="color:var(--c-t1);font-size:16px;font-weight:700;margin-bottom:6px">Connect a Reddit Account</div>'
+        '<div style="color:var(--c-t3);font-size:13px;margin-bottom:20px">'
+        'Log in to Reddit first, then confirm your username below to save the account.</div>'
+
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">'
+        '<a href="https://www.reddit.com/login" target="_blank" '
+        'style="display:inline-flex;align-items:center;gap:8px;background:#FF4500;color:#fff;'
+        'padding:10px 22px;border-radius:9px;font-size:14px;font-weight:700;text-decoration:none">'
+        '⬆ Login to Reddit</a>'
+        '<span style="color:var(--c-t3);font-size:12px">Opens Reddit in a new tab — log in, then return here</span>'
+        '</div>'
         '</div>',
         unsafe_allow_html=True,
     )
 
-    with st.expander("+ Add Reddit Account", expanded=False):
-        # ── Step 1: Login to Reddit ───────────────────────────────────────────
+    # ── Confirm logged-in account form ────────────────────────────────────────
+    with st.expander("+ Confirm & save logged-in account", expanded=False):
         st.markdown(
-            '<div style="background:var(--c-row);border:1px solid var(--c-b1);border-radius:10px;'
-            'padding:14px 18px;margin-bottom:18px">'
-            '<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;'
-            'letter-spacing:.08em;margin-bottom:10px">Step 1 — Login to Reddit first</div>'
-            '<div style="color:var(--c-t3);font-size:12px;margin-bottom:12px">'
-            'Open Reddit in a new tab, log in with your account, then come back and fill in the details below.</div>'
-            '<div style="display:flex;gap:10px;flex-wrap:wrap">'
-            '<a href="https://www.reddit.com/login" target="_blank" '
-            'style="background:#FF4500;color:#fff;padding:9px 20px;border-radius:8px;'
-            'font-size:13px;font-weight:700;text-decoration:none">Open Reddit Login</a>'
-            '<a href="https://www.reddit.com/submit" target="_blank" '
-            'style="background:var(--c-b1);color:var(--c-t1);padding:9px 18px;border-radius:8px;'
-            'font-size:13px;font-weight:600;text-decoration:none">Submit a Post</a>'
-            '</div>'
+            '<div style="color:var(--c-t3);font-size:12px;margin-bottom:14px">'
+            'After logging in to Reddit above, enter your username to confirm and save the account.</div>',
+            unsafe_allow_html=True,
+        )
+        f1, f2 = st.columns(2)
+        new_uname = f1.text_input("Reddit username (no u/)", placeholder="AptoriOfficial", key="acc_uname")
+        new_pwd   = f2.text_input("Password (stored locally)", type="password", key="acc_pwd")
+
+        f3, f4 = st.columns(2)
+        new_role  = f3.selectbox("Role", ["Brand","Founder","Thought Leadership","Community","Personal"], key="acc_role")
+        new_risk  = f4.selectbox("Risk", ["Low","Medium","High"], key="acc_risk")
+
+        new_notes = st.text_input("Notes (optional)", key="acc_notes")
+        st.caption("Credentials are stored locally in accounts.json and never leave your machine.")
+
+        if st.button("Save Account", type="primary", key="acc_add_btn"):
+            clean_uname = new_uname.strip().lstrip("u/")
+            if clean_uname:
+                _enc = _b64.b64encode(new_pwd.encode()).decode() if new_pwd else ""
+                add_account({
+                    "username": clean_uname,
+                    "password": _enc,
+                    "role": new_role,
+                    "risk": new_risk,
+                    "notes": new_notes,
+                    "status": "active",
+                    "last_used": "",
+                    "posts_made": 0,
+                    "verified_pass": 0,
+                    "verified_fail": 0,
+                })
+                st.success(f"Account u/{clean_uname} saved!")
+                time.sleep(0.4)
+                st.rerun()
+            else:
+                st.error("Enter a Reddit username.")
+
+    # ── Saved accounts list ───────────────────────────────────────────────────
+    accts = get_accounts()
+    st.markdown(
+        f'<div style="color:var(--c-t2);font-size:12px;font-weight:700;text-transform:uppercase;'
+        f'letter-spacing:.08em;margin:8px 0 14px">Your Accounts ({len(accts)})</div>',
+        unsafe_allow_html=True,
+    )
+
+    if not accts:
+        st.markdown(
+            '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:12px;'
+            'padding:40px;text-align:center">'
+            '<div style="font-size:32px;margin-bottom:10px">🔑</div>'
+            '<div style="color:var(--c-t1);font-size:15px;font-weight:600;margin-bottom:6px">No accounts yet</div>'
+            '<div style="color:var(--c-t3);font-size:13px">Click <b>Login to Reddit</b> above, then confirm your username below.</div>'
             '</div>',
             unsafe_allow_html=True,
         )
-
-        # ── Step 2: Save credentials ─────────────────────────────────────────
-        st.markdown('<div style="color:var(--c-t2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Step 2 — Save account details</div>', unsafe_allow_html=True)
-        a1, a2 = st.columns(2)
-        new_uname  = a1.text_input("Reddit username", placeholder="u/AptoriOfficial", key="acc_uname")
-        new_pwd    = a2.text_input("Reddit password", type="password", placeholder="stored locally only", key="acc_pwd")
-        a3, a4 = st.columns(2)
-        new_role   = a3.selectbox("Role", ["Brand","Founder","Thought Leadership","Community","Personal"], key="acc_role")
-        new_risk   = a4.selectbox("Risk level", ["Low","Medium","High"], key="acc_risk")
-        a5, a6 = st.columns(2)
-        new_tone   = a5.text_input("Tone", "Professional, helpful, technical", key="acc_tone")
-        new_email  = a6.text_input("Email (optional)", placeholder="linked email", key="acc_email")
-        new_rules  = st.text_area("Posting rules", "No spammy CTA. Always add value first. Mention Aptori only when relevant.", height=70, key="acc_rules")
-        new_notes  = st.text_input("Notes", key="acc_notes")
-        st.caption("Credentials stored locally in accounts.json — never sent anywhere.")
-
-        if st.button("Save Account", type="primary", key="acc_add_btn"):
-            if new_uname.strip():
-                import base64 as _b64
-                _enc_pwd = _b64.b64encode(new_pwd.encode()).decode() if new_pwd else ""
-                add_account({
-                    "username":   new_uname.strip().lstrip("u/"),
-                    "password":   _enc_pwd,
-                    "email":      new_email.strip(),
-                    "role": new_role, "tone": new_tone, "risk": new_risk,
-                    "rules": new_rules, "notes": new_notes,
-                    "status": "active", "last_used": "", "posts_made": 0,
-                    "verified_pass": 0, "verified_fail": 0,
-                })
-                st.success(f"Saved u/{new_uname.strip().lstrip('u/')}")
-                time.sleep(0.5)
-                st.rerun()
-            else:
-                st.error("Enter a username.")
-
-    accts = get_accounts()
-    if not accts:
-        st.info("No accounts added yet. Add your Reddit accounts above.")
     else:
         for acc in accts:
-            uname  = acc.get("username","")
-            role   = acc.get("role","")
-            status_a = acc.get("status","active")
-            risk   = acc.get("risk","Low")
-            pm     = acc.get("posts_made", 0)
-            vp     = acc.get("verified_pass", 0)
-            lu     = acc.get("last_used","") or "Never"
+            uname    = acc.get("username", "")
+            role     = acc.get("role", "—")
+            status_a = acc.get("status", "active")
+            risk     = acc.get("risk", "Low")
+            pm       = acc.get("posts_made", 0)
+            vp       = acc.get("verified_pass", 0)
+            lu       = (acc.get("last_used", "") or "Never")[:10]
+            _has_pwd = bool(acc.get("password", ""))
 
-            with st.expander(f"u/{uname}  ·  {role}  ·  {badge(status_a, status_a)}", expanded=False):
-                import base64 as _b64
-                _stored_pwd_b64 = acc.get("password", "")
-                _plain_pwd = _b64.b64decode(_stored_pwd_b64).decode() if _stored_pwd_b64 else ""
-                _has_pwd = bool(_plain_pwd)
+            is_active   = status_a == "active"
+            status_dot  = "#10b981" if is_active else "#6b7280"
+            status_txt  = "Active" if is_active else "Paused"
+            toggle_lbl  = "Pause" if is_active else "Resume"
 
-                # ── Stats ─────────────────────────────────────────────────────
-                ca, cb, cc, cd = st.columns(4)
-                ca.markdown(metric_card("Posts Made",    pm,      "", "#3b82f6"), unsafe_allow_html=True)
-                cb.markdown(metric_card("Verified Pass", vp,      "", "#10b981"), unsafe_allow_html=True)
-                cc.markdown(metric_card("Risk Level",    risk,    "", "#f59e0b"), unsafe_allow_html=True)
-                cd.markdown(metric_card("Last Used",     lu[:10], "", "#7c3aed"), unsafe_allow_html=True)
+            st.markdown(
+                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
+                f'padding:18px 22px;margin-bottom:12px">'
 
-                st.markdown("---")
+                # Header row
+                f'<div style="display:flex;align-items:center;justify-content:space-between;'
+                f'flex-wrap:wrap;gap:10px;margin-bottom:14px">'
+                f'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+                f'<div style="width:40px;height:40px;background:#FF450022;border:2px solid #FF4500;'
+                f'border-radius:50%;display:flex;align-items:center;justify-content:center;'
+                f'color:#FF4500;font-size:16px;font-weight:800">{uname[0].upper()}</div>'
+                f'<div>'
+                f'<div style="color:var(--c-t1);font-size:15px;font-weight:700">u/{uname}</div>'
+                f'<div style="color:var(--c-t3);font-size:12px">{role} · Risk: {risk}</div>'
+                f'</div>'
+                f'<div style="display:flex;align-items:center;gap:6px">'
+                f'<span style="width:7px;height:7px;border-radius:50%;background:{status_dot};display:inline-block"></span>'
+                f'<span style="color:{status_dot};font-size:12px;font-weight:600">{status_txt}</span>'
+                f'</div>'
+                f'</div>'
 
-                # ── Quick links ───────────────────────────────────────────────
-                st.markdown(
-                    f'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">'
-                    f'<a href="https://www.reddit.com/user/{uname}" target="_blank" '
-                    f'style="background:#FF4500;color:#fff;padding:6px 14px;border-radius:7px;'
-                    f'font-size:12px;font-weight:700;text-decoration:none">u/{uname} on Reddit</a>'
-                    f'<a href="https://www.reddit.com/submit" target="_blank" '
-                    f'style="background:var(--c-b1);color:var(--c-t2);padding:6px 14px;border-radius:7px;'
-                    f'font-size:12px;font-weight:600;text-decoration:none">Submit Post</a>'
-                    f'{"<span style=\'color:var(--c-t3);font-size:11px\'>• Password saved</span>" if _has_pwd else ""}'
-                    f'{"<span style=\'color:var(--c-t3);font-size:11px\''>• " + acc.get("email","") + "</span>" if acc.get("email") else ""}'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
+                # Reddit link
+                f'<a href="https://www.reddit.com/login" target="_blank" '
+                f'style="background:#FF4500;color:#fff;padding:7px 16px;border-radius:8px;'
+                f'font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">Open Reddit Login</a>'
+                f'</div>'
 
-                st.markdown(f'**Tone:** {acc.get("tone","")}')
-                st.markdown(f'**Posting rules:** {acc.get("rules","")}')
-                if acc.get("notes"):
-                    st.caption(f'Notes: {acc["notes"]}')
+                # Stats row
+                f'<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px">'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Posts Made</div>'
+                f'<div style="color:var(--c-t1);font-size:18px;font-weight:800">{pm}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Verified Pass</div>'
+                f'<div style="color:#10b981;font-size:18px;font-weight:800">{vp}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Last Used</div>'
+                f'<div style="color:var(--c-t1);font-size:13px;font-weight:600;margin-top:4px">{lu}</div></div>'
+                f'<div><div style="color:var(--c-t3);font-size:10px;text-transform:uppercase;letter-spacing:.07em">Password</div>'
+                f'<div style="color:var(--c-t3);font-size:13px;margin-top:4px">{"Saved" if _has_pwd else "Not set"}</div></div>'
+                f'</div>'
 
-                col_p, col_d = st.columns([1, 4])
-                toggle_lbl = "Pause" if status_a == "active" else "Resume"
-                if col_p.button(toggle_lbl, key=f"acc_tog_{uname}"):
-                    update_account(uname, {"status": "paused" if status_a == "active" else "active"})
-                    st.rerun()
-                if col_d.button("Delete Account", key=f"acc_del_{uname}"):
-                    delete_account(uname)
-                    st.rerun()
+                # Notes
+                + (f'<div style="color:var(--c-t3);font-size:12px;margin-bottom:12px">{acc.get("notes","")}</div>'
+                   if acc.get("notes") else "")
+
+                + f'</div>',
+                unsafe_allow_html=True,
+            )
+
+            # Action buttons inline below the card
+            btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 6])
+            if btn_col1.button(toggle_lbl, key=f"acc_tog_{uname}", use_container_width=True):
+                update_account(uname, {"status": "paused" if is_active else "active"})
+                st.rerun()
+            if btn_col2.button("Remove", key=f"acc_del_{uname}", use_container_width=True):
+                delete_account(uname)
+                st.rerun()
+            st.markdown('<div style="margin-bottom:4px"></div>', unsafe_allow_html=True)
 
 # =============================================================================
 # PAGE 10 — SETTINGS

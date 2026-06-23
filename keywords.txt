@@ -1,8 +1,3 @@
-# Aptori.com — Reddit Engagement Keywords
-# Extracted from https://www.aptori.com
-# One keyword per line. Lines starting with # are ignored.
-
-# ── API Security ──────────────────────────────────────────────────────────────
 API security testing
 REST API vulnerabilities
 GraphQL security
@@ -12,8 +7,6 @@ BOLA broken object level authorization
 IDOR insecure direct object reference
 API penetration testing
 API fuzzing
-
-# ── Application Security / SAST / SCA ────────────────────────────────────────
 static application security testing SAST
 software composition analysis SCA
 application security posture management
@@ -21,33 +14,23 @@ open source dependency vulnerabilities
 vulnerability remediation automation
 AI generated code security
 secure code review
-
-# ── DevSecOps / CI/CD ─────────────────────────────────────────────────────────
 DevSecOps CI CD pipeline
 shift left security testing
 security in software development lifecycle SDLC
 automated security scanning
 developer security tools
-
-# ── Penetration Testing / Offensive Security ─────────────────────────────────
 autonomous penetration testing
 continuous pen testing
 exploit proof of concept
 attack surface management
-
-# ── Cloud & Infrastructure Security ──────────────────────────────────────────
 Kubernetes security configuration
 infrastructure as code security IaC
 cloud misconfiguration detection
 secrets detection source code
-
-# ── AI Security ───────────────────────────────────────────────────────────────
 AI security threats
 LLM application security
 securing AI agents
 AI code vulnerability
-
-# ── Compliance ────────────────────────────────────────────────────────────────
 PCI DSS 4.0 compliance automation
 HIPAA security testing
 NIS2 compliance
