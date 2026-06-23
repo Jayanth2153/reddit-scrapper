@@ -862,54 +862,6 @@ elif page == "Post Discovery":
             st.markdown('<hr style="border-color:var(--c-b1);margin:4px 0 8px">', unsafe_allow_html=True)
 
 # =============================================================================
-# PAGE 4 — HUMAN INSIGHTS
-# =============================================================================
-elif page == "Human Insights":
-    st.markdown(section_header("Human Insights", "Study real human comments for tone and style — never copy directly"), unsafe_allow_html=True)
-
-    search = st.text_input("Search posts or subreddits", "", key="ins_search")
-    filtered = insights
-    if search:
-        s = search.lower()
-        filtered = [i for i in insights if s in i.get("title","").lower() or s in i.get("subreddit","").lower() or s in i.get("keyword","").lower()]
-
-    total_cmts = sum(len(i.get("top_comments",[])) for i in filtered)
-    st.caption(f"{len(filtered)} posts · {total_cmts} human comments")
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    for p in filtered:
-        hcs = p.get("top_comments", [])
-        if not hcs:
-            continue
-        top_score = max((comment_quality(c) for c in hcs), default=0)
-        with st.expander(f"r/{p.get('subreddit','')}  ·  {p.get('title','')[:65]}  ·  {len(hcs)} comments", expanded=False):
-            st.markdown(f'<a href="{p.get("permalink","#")}" target="_blank" style="color:var(--c-link);font-size:13px">Open Reddit thread</a>', unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
-            for ci, hc in enumerate(hcs):
-                qs    = comment_quality(hc)
-                body  = hc.get("body", "")
-                author = hc.get("author", "u/?")
-                qclr  = "#10b981" if qs >= 70 else "#f59e0b" if qs >= 45 else "#9ca3af"
-
-                st.markdown(
-                    f'<div style="background:var(--c-card);border:1px solid var(--c-b2);border-left:3px solid {qclr};'
-                    f'border-radius:10px;padding:16px;margin-bottom:10px">'
-                    f'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
-                    f'<div><span style="color:var(--c-link);font-weight:600">u/{author}</span></div>'
-                    f'<div style="display:flex;gap:8px;align-items:center">'
-                    f'<span style="color:{qclr};font-size:13px;font-weight:700">Quality {qs}%</span>'
-                    f'</div></div>'
-                    f'<div style="color:var(--c-t1b);font-size:13px;line-height:1.6">{body[:500]}</div>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-                c1, c2 = st.columns([1, 3])
-                if c1.button("Use as Style Anchor", key=f"ins_use_{p.get('id','')}_{ci}"):
-                    st.session_state["sidebar_nav"] = "Comment Studio"
-                    st.session_state["studio_post_id"] = p.get("id", "")
-                    st.rerun()
-
-# =============================================================================
 # PAGE 5 — COMMENT STUDIO
 # =============================================================================
 elif page == "Comment Studio":
