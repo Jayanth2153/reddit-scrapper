@@ -118,17 +118,70 @@ st.markdown(f"""
     background: var(--c-sbg) !important;
     border-right: 1px solid var(--c-b1);
     padding-top: 0;
-    min-width: 240px !important;
+    transition: width .25s ease, min-width .25s ease !important;
+}}
+[data-testid="stSidebar"][aria-expanded="true"] {{
+    min-width: 260px !important;
     max-width: 260px !important;
 }}
-[data-testid="stSidebar"] > div:first-child {{
-    padding-top: 0;
-    min-width: 240px !important;
-    max-width: 260px !important;
+[data-testid="stSidebar"][aria-expanded="false"] {{
+    min-width: 0px !important;
+    max-width: 0px !important;
+    overflow: hidden !important;
 }}
+[data-testid="stSidebar"] > div:first-child {{ padding-top: 0; }}
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span {{ color: var(--c-t1b); }}
 [data-testid="stSidebar"] .stCaption {{ color: var(--c-t3) !important; }}
+
+/* ── Sidebar collapse button (inside) ── */
+[data-testid="stSidebarCollapseButton"] button {{
+    color: var(--c-t3) !important;
+    border-radius: 6px !important;
+}}
+[data-testid="stSidebarCollapseButton"] button:hover {{
+    background: var(--c-b1) !important;
+    color: var(--c-t1) !important;
+}}
+
+/* ── Reopen tab (shown when sidebar is collapsed) ── */
+[data-testid="collapsedControl"] {{
+    position: fixed !important;
+    top: 50% !important;
+    left: 0 !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 56px !important;
+    background: var(--c-card) !important;
+    border: 1px solid var(--c-b1) !important;
+    border-left: none !important;
+    border-radius: 0 10px 10px 0 !important;
+    cursor: pointer !important;
+    z-index: 9999 !important;
+    box-shadow: 3px 0 10px rgba(0,0,0,.25) !important;
+    transition: width .15s, background .15s !important;
+}}
+[data-testid="collapsedControl"]:hover {{
+    width: 28px !important;
+    background: #E63946 !important;
+}}
+[data-testid="collapsedControl"] svg {{
+    color: var(--c-t2) !important;
+    width: 14px !important;
+    height: 14px !important;
+}}
+[data-testid="collapsedControl"]:hover svg {{
+    color: #fff !important;
+}}
+
+/* ── Main content fills width when sidebar collapsed ── */
+[data-testid="stSidebar"][aria-expanded="false"] ~ .main .block-container {{
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+}}
 /* ── Sidebar nav: modern toggle style ── */
 [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] {{
     display: flex;
