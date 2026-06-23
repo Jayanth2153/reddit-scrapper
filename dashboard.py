@@ -619,37 +619,9 @@ with st.sidebar:
         key="sidebar_nav",
     )
 
-    st.markdown('<hr style="margin:8px 0;border-color:var(--c-b1)">', unsafe_allow_html=True)
+    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
 
-    # Status section
-    st.markdown(
-        f'<div style="padding:0 4px">'
-        f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Pipeline</div>'
-        f'<div style="display:flex;flex-direction:column;gap:6px">'
-        + info_row("Posts scraped", str(len(insights)))
-        + info_row("Comments ready", str(len(pending_cmts)), "#3b82f6")
-        + info_row("Posted", str(len(posted_cmts)), "#10b981")
-        + info_row("Verified live", str(len(verified_pass)), "#10b981")
-        + f'</div></div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<hr style="margin:10px 0;border-color:var(--c-b1)">', unsafe_allow_html=True)
-
-    # Credits section
-    st.markdown(
-        f'<div style="padding:0 4px">'
-        f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Higgsfield</div>'
-        f'<div style="color:var(--c-t1);font-size:24px;font-weight:800;line-height:1">{hf_credits}'
-        f'<span style="color:var(--c-t3);font-size:12px;font-weight:400"> credits</span></div>'
-        f'<div style="color:var(--c-t3);font-size:11px;margin-top:2px">{hf.credits_used_total()} used this session</div>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<hr style="margin:10px 0;border-color:var(--c-b1)">', unsafe_allow_html=True)
-
-    if st.button("Refresh Data", use_container_width=True):
+    if st.button("Refresh Data", use_container_width=True, key="sidebar_refresh"):
         st.rerun()
 
 # =============================================================================
