@@ -363,6 +363,7 @@ class HiggsFieldClient:
             "request_id": request_id, "status": "completed",
             "result_url": result_url,
             "created_at": datetime.utcnow().isoformat(),
+            "reddit_text": "", "posted": False,
         })
         self._save()
         return {"request_id": request_id, "status": "completed",
