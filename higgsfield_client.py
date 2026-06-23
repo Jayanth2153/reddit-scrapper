@@ -23,6 +23,26 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CREDITS_FILE = Path("higgsfield_credits.json")
+MEDIA_DIR    = Path("media_lab_files")
+
+
+def _download_media(url: str, dest: str) -> bool:
+    """Download a media file from url to dest. Returns True on success."""
+    try:
+        import urllib.request
+        MEDIA_DIR.mkdir(exist_ok=True)
+        urllib.request.urlretrieve(url, dest)
+        return Path(dest).exists() and Path(dest).stat().st_size > 0
+    except Exception:
+        return False
+
+
+def _local_path_for(request_id: str, url: str) -> str:
+    """Return local file path for a given entry (does not download)."""
+    if not request_id or not url:
+        return ""
+    ext = (url.rsplit(".", 1)[-1].split("?")[0][:4] or "bin").lower()
+    return str(MEDIA_DIR / f"{request_id}.{ext}")
 
 CREDIT_COSTS = {
     "text2image_soul_v2": 4,
