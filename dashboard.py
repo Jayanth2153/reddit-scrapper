@@ -2042,14 +2042,54 @@ elif page == "Media Lab":
                             'Add accounts in Account Roster</div>',
                             unsafe_allow_html=True,
                         )
+                    # Build pre-filled Reddit submit URL
+                    import urllib.parse as _up
+                    _rt_full = _mtext or ""
+                    _rt_title = ""
+                    for _rtl in _rt_full.splitlines():
+                        if _rtl.startswith("Title:"):
+                            _rt_title = _rtl[6:].strip()
+                            break
+                    _fallback_title = _mprompt[:120] if _mprompt else "Aptori"
+                    if _murl:
+                        # Image/video: pre-fill as link post so media shows inline
+                        _submit_url = (
+                            "https://old.reddit.com/submit?"
+                            + _up.urlencode({
+                                "url":   _murl,
+                                "title": _rt_title or _fallback_title,
+                            })
+                        )
+                        _submit_hint = (
+                            "Opens Reddit with your image/video pre-loaded "
+                            "and title filled in. Copy the post text first."
+                        )
+                    elif _rt_title:
+                        # Text-only post with body
+                        _rt_body = "\n".join(
+                            l for l in _rt_full.splitlines()
+                            if not l.startswith("Title:")
+                        ).strip()
+                        _submit_url = (
+                            "https://old.reddit.com/submit?"
+                            + _up.urlencode({
+                                "title":    _rt_title,
+                                "selftext": _rt_body,
+                            })
+                        )
+                        _submit_hint = "Title and body are pre-filled. Choose a subreddit and post."
+                    else:
+                        _submit_url = "https://www.reddit.com/submit"
+                        _submit_hint = "Copy the post text first, then paste it on Reddit."
+
                     st.link_button(
                         "Open Reddit to Post ↗",
-                        "https://www.reddit.com/submit",
+                        _submit_url,
                         use_container_width=True,
                     )
                     st.markdown(
-                        '<div style="color:var(--c-t3);font-size:10px;text-align:center;line-height:1.5;margin-top:4px">'
-                        'Copy the text from the middle column, then paste it when Reddit opens.</div>',
+                        f'<div style="color:var(--c-t3);font-size:10px;text-align:center;'
+                        f'line-height:1.5;margin-top:4px">{_submit_hint}</div>',
                         unsafe_allow_html=True,
                     )
 
