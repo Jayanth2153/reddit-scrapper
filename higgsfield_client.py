@@ -309,9 +309,18 @@ class HiggsFieldClient:
                     entry["result_url"] = clean
                     changed = True
                 # ensure required fields
-                for _k, _v in (("reddit_text", ""), ("posted", False), ("result", "")):
+                for _k, _v in (("reddit_text", ""), ("posted", False), ("result", ""), ("local_path", "")):
                     if _k not in entry:
                         entry[_k] = _v
+                        changed = True
+                # cache media locally so images survive CDN expiry
+                rid       = entry.get("request_id", "")
+                cur_local = entry.get("local_path", "")
+                cur_url   = entry.get("result_url", "")
+                if cur_url and rid and (not cur_local or not Path(cur_local).exists()):
+                    dest = _local_path_for(rid, cur_url)
+                    if Path(dest).exists() or _download_media(cur_url, dest):
+                        entry["local_path"] = dest
                         changed = True
             if changed:
                 CREDITS_FILE.write_text(
