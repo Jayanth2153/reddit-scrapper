@@ -1833,32 +1833,29 @@ elif page == "Media Lab":
 
                 _col1, _col2, _col3 = st.columns([2, 3, 2], gap="medium")
 
-                # ── COL 1: Media file + preview ──────────────────────────────
+                # ── COL 1: Preview (expander) ────────────────────────────────
                 with _col1:
                     st.markdown(
                         '<div style="color:var(--c-t3);font-size:10px;font-weight:700;'
-                        'text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Media File</div>',
+                        'text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Preview</div>',
                         unsafe_allow_html=True,
                     )
                     if _murl:
-                        st.markdown(
-                            f'<a href="{_murl}" target="_blank" '
-                            f'style="display:inline-flex;align-items:center;gap:5px;color:#3b82f6;'
-                            f'font-size:11px;font-weight:600;text-decoration:none;'
-                            f'padding:4px 0;margin-bottom:8px;white-space:nowrap">'
-                            f'📎 View file ↗</a>',
-                            unsafe_allow_html=True,
-                        )
-                        with st.expander("Preview"):
+                        with st.expander("View media", expanded=False):
                             if _is_img:
                                 st.image(_murl, use_container_width=True)
+                                st.markdown(
+                                    f'<a href="{_murl}" target="_blank" style="font-size:11px;color:#3b82f6">'
+                                    f'Open full image ↗</a>',
+                                    unsafe_allow_html=True,
+                                )
                             else:
                                 st.video(_murl)
                     else:
                         st.markdown(
                             '<div style="background:var(--c-row);border:1px dashed var(--c-b2);'
                             'border-radius:8px;padding:20px;text-align:center;color:var(--c-t3);'
-                            'font-size:12px">No file URL</div>',
+                            'font-size:12px">No file available</div>',
                             unsafe_allow_html=True,
                         )
                     st.markdown(
