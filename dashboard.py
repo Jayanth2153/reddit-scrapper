@@ -1603,43 +1603,37 @@ elif page == "Higgsfield Credits":
 # PAGE 9 — ACCOUNTS MANAGER
 # =============================================================================
 elif page == "Accounts Manager":
-    st.markdown(section_header("Accounts Manager", "Connect Reddit accounts — login, verify, and manage"), unsafe_allow_html=True)
+    st.markdown(section_header("Account Roster", "Track your Reddit accounts — all posting is done manually"), unsafe_allow_html=True)
 
-    import base64 as _b64
-
-    # ── Step 1: Login to Reddit ───────────────────────────────────────────────
+    # ── Add account ───────────────────────────────────────────────────────────
     st.markdown(
         '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
         'padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;'
         'justify-content:space-between;flex-wrap:wrap;gap:16px">'
         '<div>'
-        '<div style="color:var(--c-t1);font-size:15px;font-weight:700;margin-bottom:4px">Step 1 — Login to Reddit</div>'
-        '<div style="color:var(--c-t3);font-size:13px">Opens Reddit in a new tab. Log in there, then come back and fill the form below.</div>'
+        '<div style="color:var(--c-t1);font-size:15px;font-weight:700;margin-bottom:4px">Login to Reddit</div>'
+        '<div style="color:var(--c-t3);font-size:13px">Open Reddit in your browser, log in manually, then register the username below.</div>'
         '</div>'
         '<a href="https://www.reddit.com/login" target="_blank" '
         'style="background:#FF4500;color:#fff;padding:10px 24px;border-radius:9px;'
-        'font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap">Login to Reddit ↗</a>'
+        'font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap">Open Reddit ↗</a>'
         '</div>',
         unsafe_allow_html=True,
     )
 
-    # ── Step 2: Add account (no API call) ────────────────────────────────────
     st.markdown(
         '<div style="color:var(--c-t1);font-size:14px;font-weight:700;margin-bottom:10px">'
-        'Step 2 — Save your account</div>',
+        'Register account</div>',
         unsafe_allow_html=True,
     )
 
     with st.form("acc_save_form"):
-        sf1, sf2 = st.columns(2)
+        sf1, sf2, sf3 = st.columns(3)
         save_uname = sf1.text_input("Reddit username", placeholder="YourRedditUsername", key="acc_form_uname")
-        save_pwd   = sf2.text_input("Password (stored locally)", type="password", key="acc_form_pwd")
-        sf3, sf4, sf5 = st.columns(3)
-        save_role  = sf3.selectbox("Role", ["Brand", "Founder", "Thought Leadership", "Community", "Personal"], key="acc_form_role")
-        save_risk  = sf4.selectbox("Risk", ["Low", "Medium", "High"], key="acc_form_risk")
-        save_notes = sf5.text_input("Notes (optional)", key="acc_form_notes")
-        st.caption("Password stored locally in accounts.json — never sent anywhere.")
-        submitted = st.form_submit_button("Save Account", type="primary")
+        save_role  = sf2.selectbox("Role", ["Brand", "Founder", "Thought Leadership", "Community", "Personal"], key="acc_form_role")
+        save_risk  = sf3.selectbox("Risk level", ["Low", "Medium", "High"], key="acc_form_risk")
+        save_notes = st.text_input("Notes (optional — e.g. 'main brand account', 'test account')", key="acc_form_notes")
+        submitted = st.form_submit_button("Add Account", type="primary")
 
     if submitted:
         clean = save_uname.strip().lstrip("u/")
@@ -1648,12 +1642,10 @@ elif page == "Accounts Manager":
         else:
             existing_names = [a.get("username", "") for a in get_accounts()]
             if clean in existing_names:
-                st.warning(f"u/{clean} is already saved.")
+                st.warning(f"u/{clean} is already in the roster.")
             else:
-                _enc = _b64.b64encode(save_pwd.encode()).decode() if save_pwd else ""
                 add_account({
                     "username":      clean,
-                    "password":      _enc,
                     "role":          save_role,
                     "risk":          save_risk,
                     "notes":         save_notes,
@@ -1665,7 +1657,7 @@ elif page == "Accounts Manager":
                     "karma":         0,
                     "account_age":   "—",
                 })
-                st.success(f"u/{clean} added!")
+                st.success(f"u/{clean} added to roster!")
                 time.sleep(0.4)
                 st.rerun()
 
