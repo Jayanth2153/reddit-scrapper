@@ -1894,8 +1894,8 @@ elif page == "Media Lab":
                                         unsafe_allow_html=True,
                                     )
                             else:
-                                # prefer URL for video (browser handles streaming natively)
-                                _vid_src = _murl if _murl else _msrc
+                                # prefer local file; fall back to CDN URL
+                                _vid_src = _msrc if (_mlocal and os.path.exists(_mlocal)) else (_murl or _msrc)
                                 if _vid_src:
                                     st.video(_vid_src)
                                 else:
