@@ -965,8 +965,7 @@ elif page == "Comment Studio":
                 f'<span style="color:var(--c-t2);font-size:12px">r/{item["subreddit"]}</span>'
                 f'<span style="color:var(--c-t3);font-size:11px">↑ {item["score"]}</span>'
                 f'<span style="color:var(--c-t3);font-size:11px">💬 {item["num_comments"]}</span>'
-                + (f'<span style="background:#1e3050;color:#93c5fd;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">{tone.title()}</span>' if tone else "")
-                +
+                f'{tone_badge}'
                 f'</div>'
                 f'<div style="color:var(--c-t1);font-size:14px;font-weight:700;line-height:1.4">{item["title"]}</div>'
                 f'</div>'
