@@ -516,14 +516,31 @@ APTORI_VID_PROMPTS = [
 # ── Keyword sync helper ───────────────────────────────────────────────────────
 
 def sync_keywords_to_file():
-    """Write keywords.txt from all active entries in keywords_data.json so the
-    scraper always runs with the full, up-to-date keyword list."""
+    """Write keywords.txt from all active entries in keywords_data.json."""
     kd_all = get_keywords_data()
     active = [k["keyword"] for k in kd_all if k.get("status", "active") == "active" and k.get("keyword", "").strip()]
     if not active:
         return
+    Path("keywords.txt").write_text("\n".join(active), encoding="utf-8")
+
+
+def sync_file_to_monitor():
+    """Add any keywords in keywords.txt that are missing from keywords_data.json."""
     kw_file = Path("keywords.txt")
-    kw_file.write_text("\n".join(active), encoding="utf-8")
+    if not kw_file.exists():
+        return
+    file_kws = [l.strip() for l in kw_file.read_text(encoding="utf-8").splitlines()
+                if l.strip() and not l.startswith("#")]
+    if not file_kws:
+        return
+    kd = get_keywords_data()
+    existing = {k["keyword"].lower() for k in kd}
+    new_entries = [
+        {"keyword": kw, "status": "active", "posts_found": 0, "quality_score": 0, "last_scan": ""}
+        for kw in file_kws if kw.lower() not in existing
+    ]
+    if new_entries:
+        save_keywords_data(kd + new_entries)
 
 # ── Comment generation helpers ────────────────────────────────────────────────
 
