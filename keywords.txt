@@ -1,37 +1,4 @@
-AI code vulnerability
 AI generated code security
 AI security threats
-API authorization testing
-API fuzzing
-API penetration testing
-API security testing
-BOLA broken object level authorization
 DevSecOps CI CD pipeline
-GraphQL security
-HIPAA security testing
-IDOR insecure direct object reference
-Kubernetes security configuration
-LLM application security
-NIS2 compliance
-OWASP API security top 10
-PCI DSS 4.0 compliance automation
-REST API vulnerabilities
-SOC2 vulnerability management
-application security posture management
-attack surface management
-automated security scanning
-autonomous penetration testing
-cloud misconfiguration detection
-continuous pen testing
-developer security tools
-exploit proof of concept
-infrastructure as code security IaC
-open source dependency vulnerabilities
-secrets detection source code
-secure code review
-securing AI agents
-security in software development lifecycle SDLC
-shift left security testing
-software composition analysis SCA
-static application security testing SAST
-vulnerability remediation automation
+BOLA broken object level authorization

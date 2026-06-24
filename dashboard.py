@@ -378,6 +378,58 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     border-radius: 8px !important;
 }}
 
+/* ── Multiselect: clean responsive dropdown ── */
+[data-testid="stMultiSelect"] {{
+    width: 100% !important;
+}}
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child {{
+    cursor: pointer !important;
+    border-radius: 8px !important;
+    border-color: var(--c-iborder) !important;
+    background: var(--c-input) !important;
+    flex-wrap: wrap !important;
+    min-height: 40px !important;
+}}
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child:focus-within {{
+    border-color: var(--c-link) !important;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.15) !important;
+}}
+/* hide left decorative icon inside the select box */
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:first-child > svg,
+[data-testid="stMultiSelect"] [data-baseweb="select"] span[aria-hidden="true"] {{
+    display: none !important;
+}}
+/* tag chips: tighter padding */
+[data-testid="stMultiSelect"] [data-baseweb="tag"] {{
+    border-radius: 6px !important;
+    margin: 2px !important;
+    background: var(--c-link) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+}}
+[data-testid="stMultiSelect"] [data-baseweb="tag"] span {{
+    color: #fff !important;
+}}
+/* dropdown menu */
+[data-baseweb="popover"] [data-baseweb="menu"] {{
+    background: var(--c-card) !important;
+    border: 1px solid var(--c-b1) !important;
+    border-radius: 10px !important;
+    padding: 4px !important;
+    max-height: 260px !important;
+    overflow-y: auto !important;
+}}
+[data-baseweb="popover"] [role="option"] {{
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    color: var(--c-t1) !important;
+    padding: 8px 12px !important;
+}}
+[data-baseweb="popover"] [role="option"]:hover,
+[data-baseweb="popover"] [aria-selected="true"] {{
+    background: var(--c-b1) !important;
+}}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {{
     .main .block-container {{ padding: 1rem 1rem 2rem !important; }}
