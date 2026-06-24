@@ -645,6 +645,7 @@ def generate_reddit_post_text(prompt: str, topic: str, media_type: str) -> str:
 
 
 # ── Data load ─────────────────────────────────────────────────────────────────
+sync_file_to_monitor()          # pull any new keywords.txt entries into the monitor
 data       = get_all()
 insights   = get_insights()
 kw_data    = init_keywords_data()
