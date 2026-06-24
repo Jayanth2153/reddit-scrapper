@@ -1022,18 +1022,19 @@ elif page == "Keyword Monitor":
 elif page == "Post Discovery":
     st.markdown(section_header("Post Discovery", "Fresh Reddit posts discovered by keyword — fetch new posts, review, send to Comment Studio"), unsafe_allow_html=True)
 
-    # ── Keyword multiselect (dropdown with checkboxes) ───────────────────────
+    # ── Keyword filter with checkboxes (also controls which keywords get fetched)
     _all_monitor_kws = sorted([
         k["keyword"] for k in get_keywords_data()
         if k.get("keyword", "").strip() and k.get("status", "active") == "active"
     ])
-    _kws_to_fetch = st.multiselect(
-        "Keywords to fetch posts for",
+    _sel_kws = st.multiselect(
+        "Filter by keyword",
         options=_all_monitor_kws,
         default=_all_monitor_kws,
-        key="pd_fetch_kws",
-        placeholder="Select keywords...",
+        key="pd_kw",
+        placeholder="Select keywords to filter / fetch...",
     )
+    _kws_to_fetch = _sel_kws or _all_monitor_kws
 
     # ── Toolbar ──────────────────────────────────────────────────────────────
     tb1, tb2 = st.columns([2, 2])
@@ -1044,27 +1045,24 @@ elif page == "Post Discovery":
     )
 
     if run_discovery:
-        if not _kws_to_fetch:
-            st.warning("No keywords selected — pick at least one from the list above.")
-        else:
-            _timeout = max(600, len(_kws_to_fetch) * 25)
-            with st.spinner(f"Fetching posts for {len(_kws_to_fetch)} keywords..."):
-                try:
-                    Path("keywords.txt").write_text("\n".join(_kws_to_fetch), encoding="utf-8")
-                    result = subprocess.run(
-                        ["python", "run_daily.py"],
-                        cwd=str(Path.cwd()),
-                        capture_output=True, text=True, timeout=_timeout,
-                    )
-                    if result.returncode == 0:
-                        st.success(f"Done! Fetched posts for {len(_kws_to_fetch)} keywords.")
-                        st.rerun()
-                    else:
-                        st.error(f"Scraper error:\n{result.stderr[-600:]}")
-                except subprocess.TimeoutExpired:
-                    st.error("Timed out — try fewer keywords or run again.")
-                except Exception as e:
-                    st.error(f"Error: {e}")
+        _timeout = max(600, len(_kws_to_fetch) * 25)
+        with st.spinner(f"Fetching posts for {len(_kws_to_fetch)} keywords..."):
+            try:
+                Path("keywords.txt").write_text("\n".join(_kws_to_fetch), encoding="utf-8")
+                result = subprocess.run(
+                    ["python", "run_daily.py"],
+                    cwd=str(Path.cwd()),
+                    capture_output=True, text=True, timeout=_timeout,
+                )
+                if result.returncode == 0:
+                    st.success(f"Done! Fetched posts for {len(_kws_to_fetch)} keywords.")
+                    st.rerun()
+                else:
+                    st.error(f"Scraper error:\n{result.stderr[-600:]}")
+            except subprocess.TimeoutExpired:
+                st.error("Timed out — try fewer keywords or run again.")
+            except Exception as e:
+                st.error(f"Error: {e}")
 
     # ── Filter by age ─────────────────────────────────────────────────────────
     age_hours_map = {"Last 6 hours": 6, "Last 24 hours": 24, "Last 3 days": 72, "All time": 99999}
@@ -1084,12 +1082,9 @@ elif page == "Post Discovery":
     fresh = [p for p in insights if _post_age_h(p) <= max_hours]
     fresh = sorted(fresh, key=lambda p: p.get("scraped_at", ""), reverse=True)
 
-    # ── Keyword filter — only keywords that have scraped posts ───────────────
-    _present_kws = sorted({p.get("keyword", "") for p in fresh if p.get("keyword")})
-    if _present_kws:
-        sel_kw_pd = st.selectbox("Filter by keyword", ["All keywords"] + _present_kws, key="pd_kw")
-        if sel_kw_pd != "All keywords":
-            fresh = [p for p in fresh if p.get("keyword") == sel_kw_pd]
+    # Apply keyword filter to displayed posts
+    if _sel_kws:
+        fresh = [p for p in fresh if p.get("keyword") in _sel_kws]
 
     # ── Keyword coverage badges ───────────────────────────────────────────────
     if fresh:
