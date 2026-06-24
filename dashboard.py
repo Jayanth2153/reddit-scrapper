@@ -382,30 +382,53 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
 [data-testid="stMultiSelect"] {{
     width: 100% !important;
 }}
+/* outer select wrapper: flex row so tags stay left, buttons stay right */
 [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child {{
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    flex-wrap: nowrap !important;
     cursor: pointer !important;
     border-radius: 8px !important;
     border-color: var(--c-iborder) !important;
     background: var(--c-input) !important;
-    flex-wrap: wrap !important;
     min-height: 40px !important;
+    padding-right: 4px !important;
 }}
 [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child:focus-within {{
     border-color: var(--c-link) !important;
     box-shadow: 0 0 0 2px rgba(99,102,241,0.15) !important;
 }}
-/* hide left decorative icon inside the select box */
-[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:first-child > svg,
+/* tags + input area: grows and wraps */
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:first-child {{
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding: 4px 4px !important;
+}}
+/* right-side buttons (clear + arrow): pinned right, never overlapping tags */
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:last-child {{
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    align-self: flex-start !important;
+    padding-top: 6px !important;
+    position: static !important;
+}}
+/* hide left decorative svg icon */
 [data-testid="stMultiSelect"] [data-baseweb="select"] span[aria-hidden="true"] {{
     display: none !important;
 }}
-/* tag chips: tighter padding */
+/* tag chips */
 [data-testid="stMultiSelect"] [data-baseweb="tag"] {{
     border-radius: 6px !important;
     margin: 2px !important;
     background: var(--c-link) !important;
     color: #fff !important;
     font-size: 12px !important;
+    flex-shrink: 0 !important;
 }}
 [data-testid="stMultiSelect"] [data-baseweb="tag"] span {{
     color: #fff !important;
