@@ -456,6 +456,10 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     color: var(--c-t1) !important;
     padding: 8px 12px !important;
     cursor: pointer !important;
+    line-height: 1.5 !important;
+    overflow: visible !important;
+    min-height: 36px !important;
+    align-items: center !important;
 }}
 [data-baseweb="popover"] [role="option"]:hover {{
     background: var(--c-b1) !important;
