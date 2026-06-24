@@ -1022,55 +1022,35 @@ elif page == "Keyword Monitor":
 elif page == "Post Discovery":
     st.markdown(section_header("Post Discovery", "Fresh Reddit posts discovered by keyword — fetch new posts, review, send to Comment Studio"), unsafe_allow_html=True)
 
-    # ── Keyword selector ─────────────────────────────────────────────────────
+    # ── Keyword multiselect (dropdown with checkboxes) ───────────────────────
     _all_monitor_kws = sorted([
         k["keyword"] for k in get_keywords_data()
         if k.get("keyword", "").strip() and k.get("status", "active") == "active"
     ])
-    # default: all keywords selected
-    if "pd_fetch_kws" not in st.session_state:
-        st.session_state["pd_fetch_kws"] = _all_monitor_kws
-
-    with st.expander(f"Keywords to fetch ({len(st.session_state['pd_fetch_kws'])} selected)", expanded=False):
-        _sa, _sc = st.columns(2)
-        if _sa.button("Select All", key="pd_selall", use_container_width=True):
-            st.session_state["pd_fetch_kws"] = _all_monitor_kws
-            st.rerun()
-        if _sc.button("Clear All", key="pd_clearall", use_container_width=True):
-            st.session_state["pd_fetch_kws"] = []
-            st.rerun()
-        _selected_kws = st.multiselect(
-            "Pick keywords",
-            options=_all_monitor_kws,
-            default=[k for k in st.session_state["pd_fetch_kws"] if k in _all_monitor_kws],
-            key="pd_kw_multi",
-            label_visibility="collapsed",
-        )
-        st.session_state["pd_fetch_kws"] = _selected_kws
+    _kws_to_fetch = st.multiselect(
+        "Keywords to fetch posts for",
+        options=_all_monitor_kws,
+        default=_all_monitor_kws,
+        key="pd_fetch_kws",
+        placeholder="Select keywords...",
+    )
 
     # ── Toolbar ──────────────────────────────────────────────────────────────
-    tb1, tb2, tb3 = st.columns([2, 2, 4])
-    _kws_to_fetch = st.session_state.get("pd_fetch_kws") or _all_monitor_kws
-    run_discovery = tb1.button(
-        f"Fetch Posts ({len(_kws_to_fetch)} keywords)",
-        type="primary", use_container_width=True, key="pd_run",
-    )
-    age_filter = tb2.selectbox(
+    tb1, tb2 = st.columns([2, 2])
+    run_discovery = tb1.button("Fetch Fresh Posts Now", type="primary", use_container_width=True, key="pd_run")
+    age_filter    = tb2.selectbox(
         "Age", ["Last 6 hours", "Last 24 hours", "Last 3 days", "All time"],
         index=1, key="pd_age", label_visibility="collapsed",
     )
 
     if run_discovery:
         if not _kws_to_fetch:
-            st.warning("No keywords selected — pick at least one above.")
+            st.warning("No keywords selected — pick at least one from the list above.")
         else:
-            _est_min = max(5, len(_kws_to_fetch) * 20 // 60 + 2)
-            with st.spinner(f"Fetching posts for {len(_kws_to_fetch)} keywords — est. {_est_min}+ min..."):
+            _timeout = max(600, len(_kws_to_fetch) * 25)
+            with st.spinner(f"Fetching posts for {len(_kws_to_fetch)} keywords..."):
                 try:
-                    Path("keywords.txt").write_text(
-                        "\n".join(_kws_to_fetch), encoding="utf-8"
-                    )
-                    _timeout = max(600, len(_kws_to_fetch) * 25)
+                    Path("keywords.txt").write_text("\n".join(_kws_to_fetch), encoding="utf-8")
                     result = subprocess.run(
                         ["python", "run_daily.py"],
                         cwd=str(Path.cwd()),
@@ -1082,7 +1062,7 @@ elif page == "Post Discovery":
                     else:
                         st.error(f"Scraper error:\n{result.stderr[-600:]}")
                 except subprocess.TimeoutExpired:
-                    st.error("Timed out — try selecting fewer keywords or run again.")
+                    st.error("Timed out — try fewer keywords or run again.")
                 except Exception as e:
                     st.error(f"Error: {e}")
 
