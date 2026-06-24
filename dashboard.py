@@ -386,7 +386,7 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
 [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child {{
     display: flex !important;
     flex-direction: row !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     flex-wrap: nowrap !important;
     cursor: pointer !important;
     border-radius: 8px !important;
