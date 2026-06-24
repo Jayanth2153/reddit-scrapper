@@ -390,7 +390,7 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     flex-wrap: nowrap !important;
     cursor: pointer !important;
     border-radius: 8px !important;
-    border-color: var(--c-iborder) !important;
+    border: 1px solid var(--c-link) !important;
     background: var(--c-input) !important;
     min-height: 40px !important;
     padding-right: 4px !important;
