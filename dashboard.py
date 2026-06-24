@@ -1086,15 +1086,10 @@ elif page == "Post Discovery":
     fresh = [p for p in insights if _post_age_h(p) <= max_hours]
     fresh = sorted(fresh, key=lambda p: p.get("scraped_at", ""), reverse=True)
 
-    # ── Keyword filter — all keywords from Keyword Monitor ───────────────────
-    _monitor_kws = sorted({
-        k["keyword"] for k in kw_data
-        if k.get("keyword", "").strip() and k.get("status", "active") == "active"
-    })
-    _present_kws = {p.get("keyword", "") for p in fresh if p.get("keyword")}
-    _all_kws = sorted(set(_monitor_kws) | _present_kws)
-    if _all_kws:
-        sel_kw_pd = st.selectbox("Filter by keyword", ["All keywords"] + _all_kws, key="pd_kw")
+    # ── Keyword filter — only keywords that have scraped posts ───────────────
+    _present_kws = sorted({p.get("keyword", "") for p in fresh if p.get("keyword")})
+    if _present_kws:
+        sel_kw_pd = st.selectbox("Filter by keyword", ["All keywords"] + _present_kws, key="pd_kw")
         if sel_kw_pd != "All keywords":
             fresh = [p for p in fresh if p.get("keyword") == sel_kw_pd]
 
