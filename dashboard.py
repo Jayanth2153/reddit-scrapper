@@ -406,7 +406,13 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     flex-wrap: wrap !important;
     align-items: center !important;
     min-width: 0 !important;
-    padding: 4px 4px !important;
+    padding: 6px 4px !important;
+    overflow: visible !important;
+}}
+/* placeholder div — fix line-height so ascenders aren't clipped */
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:first-child > div {{
+    line-height: 1.5 !important;
+    overflow: visible !important;
 }}
 /* right-side buttons (clear + arrow): pinned right, never overlapping tags */
 [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:last-child {{
