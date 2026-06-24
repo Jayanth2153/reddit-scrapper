@@ -1126,12 +1126,25 @@ elif page == "Post Discovery":
     ])
 
     # ── Keyword selector ─────────────────────────────────────────────────────
+    _kw_label_c, _kw_sa_c, _kw_cl_c = st.columns([6, 1, 1])
+    _kw_label_c.markdown(
+        '<span style="font-size:13px;font-weight:600;color:var(--c-t2)">Keywords</span>',
+        unsafe_allow_html=True,
+    )
+    if _kw_sa_c.button("Select all", key="pd_kw_selall", use_container_width=True):
+        st.session_state["pd_kw"] = _all_monitor_kws
+        st.rerun()
+    if _kw_cl_c.button("Clear", key="pd_kw_clear", use_container_width=True):
+        st.session_state["pd_kw"] = []
+        st.rerun()
+
     _sel_kws = st.multiselect(
         "Keywords",
         options=_all_monitor_kws,
         default=[],
         key="pd_kw",
         placeholder="All keywords — select one or more to filter posts or target a fetch",
+        label_visibility="collapsed",
     )
 
     # ── Toolbar ──────────────────────────────────────────────────────────────
