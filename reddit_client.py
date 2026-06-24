@@ -299,7 +299,7 @@ class RedditScraper:
 
         # Phase 1 — per-keyword search in r/all, filtered to target subreddits
         # This is the primary mode: find posts that match what the user cares about
-        for kw in keywords[:8]:   # cap at 8 keywords to avoid rate limit pile-up
+        for kw in keywords:
             print(f"\n  [KW]  Keyword: \"{kw}\"")
             try:
                 results = self._search(kw, None, time_filter, limit=50)
