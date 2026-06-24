@@ -421,8 +421,6 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     flex: 0 0 auto !important;
     display: flex !important;
     align-items: center !important;
-    align-self: flex-start !important;
-    padding-top: 6px !important;
     position: static !important;
 }}
 /* hide left decorative svg icon */
