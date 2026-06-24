@@ -442,15 +442,38 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     max-height: 260px !important;
     overflow-y: auto !important;
 }}
+/* whole option row = the toggle; no checkbox, just click anywhere */
 [data-baseweb="popover"] [role="option"] {{
     border-radius: 6px !important;
     font-size: 13px !important;
     color: var(--c-t1) !important;
-    padding: 8px 12px !important;
+    padding: 8px 36px 8px 12px !important;
+    position: relative !important;
+    cursor: pointer !important;
+    user-select: none !important;
 }}
-[data-baseweb="popover"] [role="option"]:hover,
-[data-baseweb="popover"] [aria-selected="true"] {{
+/* hide the built-in checkbox SVG */
+[data-baseweb="popover"] [role="option"] svg {{
+    display: none !important;
+}}
+/* unselected hover */
+[data-baseweb="popover"] [role="option"]:hover {{
     background: var(--c-b1) !important;
+}}
+/* selected: accent background + checkmark on the right */
+[data-baseweb="popover"] [role="option"][aria-selected="true"] {{
+    background: color-mix(in srgb, var(--c-link) 15%, transparent) !important;
+    color: var(--c-t1) !important;
+}}
+[data-baseweb="popover"] [role="option"][aria-selected="true"]::after {{
+    content: "✓" !important;
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--c-link) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
 }}
 
 /* ── Responsive ── */
