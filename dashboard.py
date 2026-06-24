@@ -409,12 +409,10 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
     padding: 6px 4px !important;
     overflow: visible !important;
 }}
-/* placeholder div — fix line-height so ascenders aren't clipped; center text */
+/* placeholder div — fix line-height so ascenders aren't clipped */
 [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:first-child > div {{
     line-height: 1.5 !important;
     overflow: visible !important;
-    width: 100% !important;
-    text-align: center !important;
 }}
 /* right-side buttons (clear + arrow): pinned right, never overlapping tags */
 [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child > div:last-child {{
