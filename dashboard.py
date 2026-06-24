@@ -424,7 +424,7 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
 /* tag chips */
 [data-testid="stMultiSelect"] [data-baseweb="tag"] {{
     border-radius: 6px !important;
-    margin: 2px !important;
+    margin: 0 2px 2px 0 !important;
     background: var(--c-link) !important;
     color: #fff !important;
     font-size: 12px !important;
@@ -432,6 +432,13 @@ hr {{ border-color: var(--c-b1) !important; margin: 20px 0 !important; }}
 }}
 [data-testid="stMultiSelect"] [data-baseweb="tag"] span {{
     color: #fff !important;
+}}
+/* hide search input inside multiselect */
+[data-testid="stMultiSelect"] input {{
+    opacity: 0 !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    max-width: 1px !important;
 }}
 /* dropdown menu */
 [data-baseweb="popover"] [data-baseweb="menu"] {{
