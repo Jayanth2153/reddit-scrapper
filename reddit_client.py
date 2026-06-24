@@ -19,9 +19,7 @@ MEDIA_NS = "http://search.yahoo.com/mrss/"
 
 SESSION = requests.Session()
 SESSION.headers.update({
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/125.0.0.0 Safari/537.36",
+    "User-Agent": "AptoriResearchBot/1.0 (RSS feed reader; internal use)",
     "Accept-Language": "en-US,en;q=0.9",
 })
 
