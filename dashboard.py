@@ -1022,19 +1022,19 @@ elif page == "Keyword Monitor":
 elif page == "Post Discovery":
     st.markdown(section_header("Post Discovery", "Fresh Reddit posts discovered by keyword — fetch new posts, review, send to Comment Studio"), unsafe_allow_html=True)
 
-    # ── Keyword filter with checkboxes (also controls which keywords get fetched)
     _all_monitor_kws = sorted([
         k["keyword"] for k in get_keywords_data()
         if k.get("keyword", "").strip() and k.get("status", "active") == "active"
     ])
+
+    # ── Keyword selector ─────────────────────────────────────────────────────
     _sel_kws = st.multiselect(
-        "Filter by keyword",
+        "Keywords",
         options=_all_monitor_kws,
-        default=_all_monitor_kws,
+        default=[],
         key="pd_kw",
-        placeholder="Select keywords to filter / fetch...",
+        placeholder="All keywords — select one or more to filter posts or target a fetch",
     )
-    _kws_to_fetch = _sel_kws or _all_monitor_kws
 
     # ── Toolbar ──────────────────────────────────────────────────────────────
     tb1, tb2 = st.columns([2, 2])
@@ -1045,6 +1045,7 @@ elif page == "Post Discovery":
     )
 
     if run_discovery:
+        _kws_to_fetch = _sel_kws or _all_monitor_kws
         _timeout = max(600, len(_kws_to_fetch) * 25)
         with st.spinner(f"Fetching posts for {len(_kws_to_fetch)} keywords..."):
             try:
@@ -1082,7 +1083,6 @@ elif page == "Post Discovery":
     fresh = [p for p in insights if _post_age_h(p) <= max_hours]
     fresh = sorted(fresh, key=lambda p: p.get("scraped_at", ""), reverse=True)
 
-    # Apply keyword filter to displayed posts
     if _sel_kws:
         fresh = [p for p in fresh if p.get("keyword") in _sel_kws]
 
