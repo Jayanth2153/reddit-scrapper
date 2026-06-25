@@ -1449,8 +1449,10 @@ elif page == "Comment Studio":
             vst_label = "PASS" if vst == "pass" else "FAIL" if vst == "fail" else "PENDING"
             posted_color = "#10b981" if posted else "#6b7280"
 
+            _is_target = (_target_pid and pid == _target_pid)
+            _card_border = "2px solid var(--c-link)" if _is_target else "1px solid var(--c-b1)"
             st.markdown(
-                f'<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:16px;'
+                f'<div style="background:var(--c-card);border:{_card_border};border-radius:16px;'
                 f'margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.12)">'
 
                 # ── Post header ──
