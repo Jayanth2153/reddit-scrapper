@@ -1277,7 +1277,7 @@ elif page == "Comment Studio":
     show_filter = tb2.selectbox("Filter", ["All", "Not Posted", "Posted", "Pass", "Fail"], key="cs_filter", label_visibility="collapsed")
 
     if run_scraper:
-        with st.spinner("Syncing keywords and generating comments with Claude — this takes ~2 minutes..."):
+        with st.spinner("Syncing keywords and preparing comments — this takes ~2 minutes..."):
             try:
                 sync_keywords_to_file()
                 result = subprocess.run(
