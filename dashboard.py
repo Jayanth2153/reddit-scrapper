@@ -1269,7 +1269,7 @@ elif page == "Post Discovery":
 # PAGE 5 — COMMENT STUDIO
 # =============================================================================
 elif page == "Comment Studio":
-    st.markdown(section_header("Comment Studio", "Top scraped posts with Claude-generated humanized comments — copy, post, confirm."), unsafe_allow_html=True)
+    st.markdown(section_header("Comment Studio", "Top scraped posts with ready-to-post comments — copy, post, confirm."), unsafe_allow_html=True)
 
     # ── Toolbar ──────────────────────────────────────────────────────────────
     tb1, tb2, tb3 = st.columns([2, 2, 4])

@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "username": "aptoridemo",
+    "role": "Brand",
+    "risk": "Low",
+    "notes": "",
+    "status": "active",
+    "last_used": "",
+    "posts_made": 0,
+    "verified_pass": 0,
+    "verified_fail": 0,
+    "karma": 0,
+    "account_age": "—"
+  }
+]
