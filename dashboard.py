@@ -2599,8 +2599,3 @@ elif page == "Settings":
             col_a, col_b = st.columns([2, 1])
             col_a.markdown(f'<span style="color:{"#10b981" if exists else "#ef4444"}">{f}</span>', unsafe_allow_html=True)
             col_b.caption(f"{size:,} bytes" if exists else "not found")
-
-# ── Poll background fetch every 5 s until complete ────────────────────────────
-if "auto_fetch_proc" in st.session_state:
-    time.sleep(5)
-    st.rerun()
