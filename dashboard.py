@@ -1853,15 +1853,50 @@ elif page == "Content Studio":
     # TAB 3 — CONTENT IDEAS
     # =========================================================================
     with tab_ideas:
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(
-            '<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Top Reddit Threads — Use as Prompt Inspiration</div>',
+        # Prompt style templates — rotated on each refresh
+        _IMG_TEMPLATES = [
+            "Professional Aptori post image: {title}, dark enterprise SaaS style, API security theme, cinematic quality",
+            "Tech editorial graphic: {title}, clean dark background, teal and white typography, security product visual",
+            "Dark cybersecurity illustration: {title}, network threat visualization, Aptori brand colors, high contrast",
+            "Enterprise dashboard mockup: {title}, dark mode UI, API testing interface, sharp professional aesthetic",
+            "Minimalist security poster: {title}, bold typography on dark background, stark contrast, Aptori brand",
+        ]
+        _VID_TEMPLATES = [
+            "Cinematic video about: {title}, Aptori brand, teal and dark blue tones, dramatic lighting",
+            "Fast-cut tech montage: {title}, security engineer at workstation, dark office glow, rapid transitions",
+            "Product story video: {title}, API security workflow animation, clean dark UI, professional feel",
+            "Documentary-style segment: {title}, enterprise server room environment, developer focus, serious tone",
+            "Motion graphic explainer: {title}, animated network diagrams, threat visualization, teal on dark",
+        ]
+
+        # Refresh counter drives shuffle + template variant
+        if "ideas_refresh_count" not in st.session_state:
+            st.session_state["ideas_refresh_count"] = 0
+        _rc = st.session_state["ideas_refresh_count"]
+
+        # Header row with Refresh button
+        _ih_col, _ir_col = st.columns([7, 1])
+        _ih_col.markdown(
+            '<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
+            'letter-spacing:.1em;padding-top:10px">Top Reddit Threads — Use as Prompt Inspiration</div>',
             unsafe_allow_html=True,
         )
+        if _ir_col.button("↺ Refresh", key="ideas_refresh_btn", use_container_width=True):
+            st.session_state["ideas_refresh_count"] += 1
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
         if not insights:
             st.info("Run the scraper to pull in Reddit discussions and generate content ideas.")
         else:
-            for p in sorted(insights, key=intent_score, reverse=True)[:15]:
+            import random as _rnd
+            _rng = _rnd.Random(_rc)
+            _shuffled = sorted(insights, key=intent_score, reverse=True)
+            _rng.shuffle(_shuffled)
+            _tpl_idx = _rc % len(_IMG_TEMPLATES)
+
+            for p in _shuffled[:15]:
                 isc = intent_score(p)
                 iclr = "#10b981" if isc >= 70 else "#f59e0b" if isc >= 45 else "#ef4444"
                 _has_p_url = p.get("permalink","")
@@ -1875,8 +1910,9 @@ elif page == "Content Studio":
                         f'</div>',
                         unsafe_allow_html=True,
                     )
-                    _sug_img = f"Professional Aptori post image: {p.get('title','')[:80]}, dark enterprise SaaS style, API security theme, cinematic quality"
-                    _sug_vid = f"Cinematic video about: {p.get('title','')[:80]}, Aptori brand, teal and dark blue tones, dramatic lighting"
+                    _title_snippet = p.get("title", "")[:80]
+                    _sug_img = _IMG_TEMPLATES[_tpl_idx].format(title=_title_snippet)
+                    _sug_vid = _VID_TEMPLATES[_tpl_idx].format(title=_title_snippet)
                     st.markdown(
                         f'<div style="background:var(--c-row);border-radius:10px;padding:14px;margin-bottom:8px">'
                         f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Suggested Post Image Prompt</div>'
@@ -1889,13 +1925,13 @@ elif page == "Content Studio":
                         unsafe_allow_html=True,
                     )
                     _ic1, _ic2 = st.columns(2)
-                    if _ic1.button("Use as Image Prompt", key=f"idea_img_{p.get('id','')}"):
+                    if _ic1.button("Use as Image Prompt", key=f"idea_img_{p.get('id','')}_{_rc}"):
                         st.session_state["_pre_cs_img_prompt"] = _sug_img
-                        st.session_state["_pre_sidebar_nav"]        = "Content Studio"
+                        st.session_state["_pre_sidebar_nav"]   = "Content Studio"
                         st.rerun()
-                    if _ic2.button("Use as Video Prompt", key=f"idea_vid_{p.get('id','')}"):
+                    if _ic2.button("Use as Video Prompt", key=f"idea_vid_{p.get('id','')}_{_rc}"):
                         st.session_state["_pre_cs_vid_prompt"] = _sug_vid
-                        st.session_state["_pre_sidebar_nav"]        = "Content Studio"
+                        st.session_state["_pre_sidebar_nav"]   = "Content Studio"
                         st.rerun()
 
 # =============================================================================
