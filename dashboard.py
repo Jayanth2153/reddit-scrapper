@@ -1306,6 +1306,46 @@ elif page == "Comment Studio":
             except Exception as e:
                 st.error(f"Error: {e}")
 
+    # ── Live-post sync: remove Reddit-deleted posts ───────────────────────────
+    def _reddit_post_live(post_id: str, subreddit: str) -> bool:
+        """Return False if the post has been removed/deleted on Reddit."""
+        try:
+            _r = _requests.get(
+                f"https://www.reddit.com/r/{subreddit}/comments/{post_id}/.json",
+                headers={"User-Agent": "AptoriResearchBot/1.0 (RSS feed reader; internal use)"},
+                timeout=5,
+            )
+            if _r.status_code == 404:
+                return False
+            if _r.status_code == 200:
+                _pd = _r.json()[0]["data"]["children"][0]["data"]
+                if _pd.get("selftext") in ("[removed]", "[deleted]"):
+                    return False
+                if _pd.get("removed_by_category"):
+                    return False
+        except Exception:
+            pass
+        return True
+
+    # Auto-check once per session; also expose a manual Sync button
+    _sync_col, _ = st.columns([1, 7])
+    _do_sync = _sync_col.button("↺ Sync", key="cs_sync_live", help="Remove posts Reddit has taken down")
+    if _do_sync or "cs_live_synced" not in st.session_state:
+        _dead = []
+        _all_stored = get_all().get("comments", [])
+        _check_items = {c["post_id"]: c.get("subreddit","") for c in _all_stored}
+        if _check_items:
+            with st.spinner(f"Checking {len(_check_items)} posts against Reddit..."):
+                for _chk_pid, _chk_sub in _check_items.items():
+                    if not _reddit_post_live(_chk_pid, _chk_sub):
+                        _dead.append(_chk_pid)
+            for _dp in _dead:
+                delete_comment_by_post_id(_dp)
+            st.session_state["cs_live_synced"] = True
+            if _dead:
+                st.success(f"Removed {len(_dead)} post(s) that no longer exist on Reddit.")
+                st.rerun()
+
     # ── Load data ─────────────────────────────────────────────────────────────
     data_cs      = get_all()
     insight_map  = {p.get("id",""): p for p in insights}
