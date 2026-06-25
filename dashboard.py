@@ -1456,7 +1456,7 @@ elif page == "Comment Studio":
                             st.success("Regenerated!")
                             st.rerun()
                         else:
-                            st.error("Claude returned nothing — check ANTHROPIC_API_KEY in .env")
+                            st.error("Comment generation failed — check ANTHROPIC_API_KEY in .env")
                     except Exception as e:
                         st.error(f"Error: {e}")
 
