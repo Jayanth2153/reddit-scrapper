@@ -787,24 +787,16 @@ def _has_fresh_posts(post_list, max_hours=24):
 if "auto_fetch_done" not in st.session_state:
     st.session_state["auto_fetch_done"] = True
     if not _has_fresh_posts(insights):
-        _af_placeholder = st.empty()
-        with _af_placeholder.container():
-            st.info("Fetching fresh posts from Reddit — this runs once on launch and respects Reddit's rate limits…")
         try:
             sync_keywords_to_file()
-            _af_result = subprocess.run(
+            st.session_state["auto_fetch_proc"] = subprocess.Popen(
                 ["python", "run_daily.py"],
                 cwd=str(Path.cwd()),
-                capture_output=True, text=True, timeout=600,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
-            _af_placeholder.empty()
-            if _af_result.returncode == 0:
-                insights = get_insights()
-                high_intent = [p for p in insights if intent_score(p) >= 60]
-                st.rerun()
-            # silently ignore non-zero exit — stale posts still visible
         except Exception:
-            _af_placeholder.empty()
+            pass
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 NAV_ITEMS = [
