@@ -1,4 +1,2 @@
-AI generated code security
-AI security threats
-DevSecOps CI CD pipeline
-BOLA broken object level authorization
+exploit proof of concept
+securing AI agents

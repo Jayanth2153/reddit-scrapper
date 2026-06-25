@@ -2239,22 +2239,36 @@ elif page == "Account Roster":
             if clean in existing_names:
                 st.warning(f"u/{clean} is already in the roster.")
             else:
-                add_account({
-                    "username":      clean,
-                    "role":          save_role,
-                    "risk":          save_risk,
-                    "notes":         save_notes,
-                    "status":        "active",
-                    "last_used":     "",
-                    "posts_made":    0,
-                    "verified_pass": 0,
-                    "verified_fail": 0,
-                    "karma":         0,
-                    "account_age":   "—",
-                })
-                st.success(f"u/{clean} added to roster!")
-                time.sleep(0.4)
-                st.rerun()
+                # Verify the username exists on Reddit before adding
+                try:
+                    _resp = _requests.get(
+                        f"https://www.reddit.com/user/{clean}/about.json",
+                        headers={"User-Agent": "AptoriResearchBot/1.0 (account check; internal use)"},
+                        timeout=6,
+                    )
+                    if _resp.status_code == 404:
+                        st.error(f"u/{clean} doesn't exist on Reddit — check the spelling and try again.")
+                    elif _resp.status_code == 200:
+                        add_account({
+                            "username":      clean,
+                            "role":          save_role,
+                            "risk":          save_risk,
+                            "notes":         save_notes,
+                            "status":        "active",
+                            "last_used":     "",
+                            "posts_made":    0,
+                            "verified_pass": 0,
+                            "verified_fail": 0,
+                            "karma":         0,
+                            "account_age":   "—",
+                        })
+                        st.success(f"u/{clean} added to roster!")
+                        time.sleep(0.4)
+                        st.rerun()
+                    else:
+                        st.warning(f"Reddit returned status {_resp.status_code} — couldn't verify u/{clean}. Try again.")
+                except _requests.RequestException:
+                    st.error("Couldn't reach Reddit to verify the username. Check your internet connection.")
 
     # ── Saved accounts list ───────────────────────────────────────────────────
     accts = get_accounts()
