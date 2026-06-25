@@ -1166,7 +1166,7 @@ elif page == "Post Discovery":
             try:
                 Path("keywords.txt").write_text("\n".join(_kws_to_fetch), encoding="utf-8")
                 result = subprocess.run(
-                    ["python", "run_daily.py"],
+                    ["python", "run_daily.py", "--scrape-only"],
                     cwd=str(Path.cwd()),
                     capture_output=True, text=True, timeout=_timeout,
                 )
