@@ -1367,8 +1367,7 @@ elif page == "Comment Studio":
             cst      = item["comment_status"]
             tone     = item["tone"]
             _plink = item["permalink"]
-            _pbase = _plink if _plink.startswith("http") else f"https://www.reddit.com{_plink}"
-            full_url = _pbase.rstrip("/") + "/#comments"
+            full_url = _plink if _plink.startswith("http") else f"https://www.reddit.com{_plink}"
 
             # Pre-compute snippets to avoid nested f-strings
             tone_badge = (
