@@ -772,31 +772,6 @@ verified_pass  = [c for c in comments_all if c.get("verification_status") == "pa
 verified_fail  = [c for c in comments_all if c.get("verification_status") == "fail"]
 high_intent    = [p for p in insights if intent_score(p) >= 60]
 
-# ── Auto-fetch on first load if no posts from last 24 h ───────────────────────
-def _has_fresh_posts(post_list, max_hours=24):
-    _now = datetime.utcnow()
-    for _p in post_list:
-        try:
-            _age = (_now - datetime.fromisoformat(_p.get("scraped_at", "").rstrip("Z"))).total_seconds() / 3600
-            if _age <= max_hours:
-                return True
-        except Exception:
-            pass
-    return False
-
-if "auto_fetch_done" not in st.session_state:
-    st.session_state["auto_fetch_done"] = True
-    if not _has_fresh_posts(insights):
-        try:
-            sync_keywords_to_file()
-            st.session_state["auto_fetch_proc"] = subprocess.Popen(
-                ["python", "run_daily.py", "--scrape-only"],
-                cwd=str(Path.cwd()),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception:
-            pass
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 NAV_ITEMS = [
