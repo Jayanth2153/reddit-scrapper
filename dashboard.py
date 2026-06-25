@@ -1398,7 +1398,7 @@ elif page == "Comment Studio":
                 # ── Comment body ──
                 f'<div style="padding:16px 20px;border-bottom:1px solid var(--c-b1)">'
                 f'<div style="color:var(--c-t3);font-size:10px;font-weight:700;text-transform:uppercase;'
-                f'letter-spacing:.1em;margin-bottom:10px">Claude-Generated Comment</div>'
+                f'letter-spacing:.1em;margin-bottom:10px">Draft Comment</div>'
                 f'<div style="background:var(--c-row);border-radius:10px;padding:14px 16px;'
                 f'font-size:13px;line-height:1.75;color:var(--c-t1b);white-space:pre-wrap">{cmt_text}</div>'
                 f'<div style="color:var(--c-t3);font-size:11px;margin-top:8px">'
