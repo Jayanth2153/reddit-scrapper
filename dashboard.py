@@ -2240,7 +2240,7 @@ elif page == "Account Roster":
             if clean in existing_names:
                 st.warning(f"u/{clean} is already in the roster.")
             else:
-                # Verify the username exists on Reddit via RSS feed
+                # Verify the username exists on Reddit and check exact case via RSS
                 _verified = False
                 _verify_err = None
                 try:
@@ -2253,7 +2253,26 @@ elif page == "Account Roster":
                     if _resp.status_code == 404:
                         _verify_err = f"u/{clean} doesn't exist on Reddit — check the spelling and try again."
                     elif _resp.status_code == 200:
-                        _verified = True
+                        # Extract canonical username from feed's <category label="u/spez">
+                        _actual_name = None
+                        try:
+                            _root = _ET.fromstring(_resp.text)
+                            _ATOM = "http://www.w3.org/2005/Atom"
+                            for _cat in _root.findall(f"{{{_ATOM}}}category"):
+                                _lbl = _cat.attrib.get("label", "")
+                                if _lbl.startswith("u/"):
+                                    _actual_name = _lbl[2:]
+                                    break
+                        except Exception:
+                            pass
+
+                        if _actual_name and _actual_name != clean:
+                            _verify_err = (
+                                f"Username is case-sensitive — Reddit knows this account as "
+                                f"u/{_actual_name}. Please re-enter it exactly as shown."
+                            )
+                        else:
+                            _verified = True
                     # 429 or other = rate limited / inconclusive → allow add
                 except _requests.RequestException:
                     pass  # network issue → allow add
