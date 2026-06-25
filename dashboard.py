@@ -2267,10 +2267,7 @@ elif page == "Account Roster":
                             pass
 
                         if _actual_name and _actual_name != clean:
-                            _verify_err = (
-                                f"Username is case-sensitive — Reddit knows this account as "
-                                f"u/{_actual_name}. Please re-enter it exactly as shown."
-                            )
+                            _verify_err = f"u/{clean} not found on Reddit — username doesn't exist or is incorrect."
                         else:
                             _verified = True
                     # 429 or other = rate limited / inconclusive → allow add
