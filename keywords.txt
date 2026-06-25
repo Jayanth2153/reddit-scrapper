@@ -1,2 +1,36 @@
+API security testing
+REST API vulnerabilities
+GraphQL security
+OWASP API security top 10
+API authorization testing
+BOLA broken object level authorization
+IDOR insecure direct object reference
+API penetration testing
+API fuzzing
+static application security testing SAST
+software composition analysis SCA
+application security posture management
+open source dependency vulnerabilities
+vulnerability remediation automation
+AI generated code security
+secure code review
+DevSecOps CI CD pipeline
+shift left security testing
+security in software development lifecycle SDLC
+automated security scanning
+developer security tools
+autonomous penetration testing
+continuous pen testing
 exploit proof of concept
+attack surface management
+Kubernetes security configuration
+infrastructure as code security IaC
+cloud misconfiguration detection
+secrets detection source code
+AI security threats
+LLM application security
 securing AI agents
+PCI DSS 4.0 compliance automation
+HIPAA security testing
+NIS2 compliance
+SOC2 vulnerability management
