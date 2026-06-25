@@ -1436,7 +1436,7 @@ elif page == "Comment Studio":
                 })
                 st.rerun()
 
-            if b6.button("Regen", key=f"cs_regen_{pid}", use_container_width=True):
+            if b6.button("Regenerate", key=f"cs_regen_{pid}", use_container_width=True):
                 post_for_regen = insight_map.get(pid, {
                     "id": pid, "title": item["title"], "selftext": "",
                     "permalink": item["permalink"], "subreddit": item["subreddit"],
