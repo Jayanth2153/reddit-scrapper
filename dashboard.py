@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import time
+import xml.etree.ElementTree as _ET
 from datetime import datetime
 from pathlib import Path
 
