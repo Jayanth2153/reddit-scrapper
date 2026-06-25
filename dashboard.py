@@ -1282,10 +1282,39 @@ elif page == "Post Discovery":
 elif page == "Comment Studio":
     st.markdown(section_header("Comment Studio", "Top scraped posts with ready-to-post comments — copy, post, confirm."), unsafe_allow_html=True)
 
+    # ── Live-post checker via by_id RSS (works with bot UA, no subreddit needed)
+    def _reddit_post_live(post_id: str) -> bool:
+        try:
+            _r = _requests.get(
+                f"https://www.reddit.com/by_id/t3_{post_id}.rss",
+                headers={"User-Agent": "AptoriResearchBot/1.0 (RSS feed reader; internal use)"},
+                timeout=6,
+            )
+            if _r.status_code == 404:
+                return False
+            if _r.status_code == 200:
+                _root = _ET.fromstring(_r.text)
+                _ATOM = "http://www.w3.org/2005/Atom"
+                _entries = _root.findall(f"{{{_ATOM}}}entry")
+                if not _entries:
+                    return False  # empty feed = post gone
+                for _e in _entries:
+                    _tc = " ".join(filter(None, [
+                        getattr(_e.find(f"{{{_ATOM}}}title"),   "text", "") or "",
+                        getattr(_e.find(f"{{{_ATOM}}}content"), "text", "") or "",
+                    ])).lower()
+                    if "[removed]" in _tc or "[deleted]" in _tc:
+                        return False
+            # 429 / other = rate-limited, assume live
+        except Exception:
+            pass
+        return True
+
     # ── Toolbar ──────────────────────────────────────────────────────────────
-    tb1, tb2, tb3 = st.columns([2, 2, 4])
+    tb1, tb2, tb3, tb4 = st.columns([2, 2, 1, 3])
     run_scraper = tb1.button("Fetch 10 Fresh Posts", type="primary", use_container_width=True, key="cs_run_scraper")
     show_filter = tb2.selectbox("Filter", ["All", "Not Posted", "Posted", "Pass", "Fail"], key="cs_filter", label_visibility="collapsed")
+    do_sync     = tb3.button("↺ Sync", key="cs_sync_live", use_container_width=True, help="Remove posts Reddit has taken down")
 
     if run_scraper:
         with st.spinner("Syncing keywords and preparing comments — this takes ~2 minutes..."):
@@ -1306,39 +1335,15 @@ elif page == "Comment Studio":
             except Exception as e:
                 st.error(f"Error: {e}")
 
-    # ── Live-post sync: remove Reddit-deleted posts ───────────────────────────
-    def _reddit_post_live(post_id: str, subreddit: str) -> bool:
-        """Return False if the post has been removed/deleted on Reddit."""
-        try:
-            _r = _requests.get(
-                f"https://www.reddit.com/r/{subreddit}/comments/{post_id}/.json",
-                headers={"User-Agent": "AptoriResearchBot/1.0 (RSS feed reader; internal use)"},
-                timeout=5,
-            )
-            if _r.status_code == 404:
-                return False
-            if _r.status_code == 200:
-                _pd = _r.json()[0]["data"]["children"][0]["data"]
-                if _pd.get("selftext") in ("[removed]", "[deleted]"):
-                    return False
-                if _pd.get("removed_by_category"):
-                    return False
-        except Exception:
-            pass
-        return True
-
-    # Auto-check once per session; also expose a manual Sync button
-    _sync_col, _ = st.columns([1, 7])
-    _do_sync = _sync_col.button("↺ Sync", key="cs_sync_live", help="Remove posts Reddit has taken down")
-    if _do_sync or "cs_live_synced" not in st.session_state:
-        _dead = []
-        _all_stored = get_all().get("comments", [])
-        _check_items = {c["post_id"]: c.get("subreddit","") for c in _all_stored}
-        if _check_items:
-            with st.spinner(f"Checking {len(_check_items)} posts against Reddit..."):
-                for _chk_pid, _chk_sub in _check_items.items():
-                    if not _reddit_post_live(_chk_pid, _chk_sub):
-                        _dead.append(_chk_pid)
+    if do_sync or "cs_live_synced" not in st.session_state:
+        _all_pids = list({c["post_id"] for c in get_all().get("comments", [])})
+        if _all_pids:
+            _dead = []
+            with st.spinner(f"Checking {len(_all_pids)} posts against Reddit..."):
+                for _pid in _all_pids:
+                    if not _reddit_post_live(_pid):
+                        _dead.append(_pid)
+                    time.sleep(1.2)  # stay under Reddit rate limit
             for _dp in _dead:
                 delete_comment_by_post_id(_dp)
             st.session_state["cs_live_synced"] = True
