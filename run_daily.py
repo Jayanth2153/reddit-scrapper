@@ -20,6 +20,9 @@ MAX_POSTS     = 10
 TOP_COMMENTS  = 5
 W = 70
 
+# --scrape-only: skip comment fetching and AI generation (faster, for auto-fetch)
+SCRAPE_ONLY = "--scrape-only" in sys.argv
+
 
 def load_keywords() -> list:
     if not KEYWORDS_FILE.exists():
