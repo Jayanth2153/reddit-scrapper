@@ -944,6 +944,15 @@ _stc.html("""
 </script>
 """, height=0)
 
+# ── Background fetch banner (non-blocking) ────────────────────────────────────
+if "auto_fetch_proc" in st.session_state:
+    _proc = st.session_state["auto_fetch_proc"]
+    if _proc.poll() is not None:
+        del st.session_state["auto_fetch_proc"]
+        st.rerun()
+    else:
+        st.info("Fetching fresh posts in the background — dashboard will refresh automatically when done…")
+
 # =============================================================================
 # PAGE 1 — DASHBOARD (OVERVIEW)
 # =============================================================================
