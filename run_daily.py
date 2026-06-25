@@ -80,6 +80,34 @@ def main():
 
     print(f"\n  [OK]  {len(posts)} new posts scraped (skipped already-processed ones)")
 
+    if SCRAPE_ONLY:
+        # Fast path: skip comment fetching and AI generation
+        insights = [
+            {
+                "id":               p.id,
+                "title":            p.title,
+                "subreddit":        p.subreddit,
+                "permalink":        p.permalink,
+                "author":           p.author,
+                "keyword":          p.keyword,
+                "score":            p.score,
+                "num_comments":     p.num_comments,
+                "engagement_score": p.engagement_score,
+                "selftext":         p.selftext[:500],
+                "scraped_at":       datetime.utcnow().isoformat(),
+                "top_comments":     [],
+            }
+            for p in posts
+        ]
+        storage.save_insights(insights)
+        storage.mark_scraped_ids([p.id for p in posts])
+        print(f"\n{'=' * W}")
+        print(f"  SCRAPE COMPLETE  --  {datetime.now().strftime('%Y-%m-%d  %H:%M')}")
+        print(f"{'=' * W}")
+        print(f"  [OK]   {len(posts)} posts saved — open dashboard to view")
+        print(f"{'=' * W}\n")
+        return
+
     # STEP 2: Fetch human comments
     print(f"\n{'-' * W}")
     print("  STEP 2  --  Fetching human comments from posts")
