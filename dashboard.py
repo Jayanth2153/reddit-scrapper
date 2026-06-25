@@ -772,6 +772,40 @@ verified_pass  = [c for c in comments_all if c.get("verification_status") == "pa
 verified_fail  = [c for c in comments_all if c.get("verification_status") == "fail"]
 high_intent    = [p for p in insights if intent_score(p) >= 60]
 
+# ── Auto-fetch on first load if no posts from last 24 h ───────────────────────
+def _has_fresh_posts(post_list, max_hours=24):
+    _now = datetime.utcnow()
+    for _p in post_list:
+        try:
+            _age = (_now - datetime.fromisoformat(_p.get("scraped_at", "").rstrip("Z"))).total_seconds() / 3600
+            if _age <= max_hours:
+                return True
+        except Exception:
+            pass
+    return False
+
+if "auto_fetch_done" not in st.session_state:
+    st.session_state["auto_fetch_done"] = True
+    if not _has_fresh_posts(insights):
+        _af_placeholder = st.empty()
+        with _af_placeholder.container():
+            st.info("Fetching fresh posts from Reddit — this runs once on launch and respects Reddit's rate limits…")
+        try:
+            sync_keywords_to_file()
+            _af_result = subprocess.run(
+                ["python", "run_daily.py"],
+                cwd=str(Path.cwd()),
+                capture_output=True, text=True, timeout=600,
+            )
+            _af_placeholder.empty()
+            if _af_result.returncode == 0:
+                insights = get_insights()
+                high_intent = [p for p in insights if intent_score(p) >= 60]
+                st.rerun()
+            # silently ignore non-zero exit — stale posts still visible
+        except Exception:
+            _af_placeholder.empty()
+
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 NAV_ITEMS = [
     "Dashboard",
