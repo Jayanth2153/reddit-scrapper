@@ -1034,10 +1034,16 @@ if page == "Dashboard":
         [p for p in insights if _dash_age(p) <= dash_max_h],
         key=intent_score, reverse=True
     )[:6]
+    _dash_fallback = False
+    if not top_posts and insights:
+        top_posts = sorted(insights, key=intent_score, reverse=True)[:6]
+        _dash_fallback = True
 
     st.markdown("<br>", unsafe_allow_html=True)
+    if _dash_fallback:
+        st.caption("Showing previously fetched posts — fresh posts will appear once the background fetch completes.")
     if not top_posts:
-        st.info("No posts in this time window — click **Fetch New Posts** or widen the timeline.")
+        st.info("No posts yet — click **Fetch New Posts** to get started.")
     else:
         for i in range(0, len(top_posts), 2):
             cols = st.columns(2)
