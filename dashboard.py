@@ -1407,6 +1407,14 @@ elif page == "Comment Studio":
     elif show_filter == "Fail":
         cs_items = [x for x in cs_items if x["verification_status"] == "fail"]
 
+    # If navigated here via "Send to Comment Studio", float that post to the top
+    _target_pid = st.session_state.pop("studio_post_id", None)
+    if _target_pid:
+        _match = [x for x in cs_items if x["post_id"] == _target_pid]
+        _rest  = [x for x in cs_items if x["post_id"] != _target_pid]
+        if _match:
+            cs_items = _match + _rest
+
     if not cs_items:
         st.markdown(
             '<div style="background:var(--c-card);border:1px solid var(--c-b1);border-radius:14px;'
