@@ -1335,7 +1335,7 @@ elif page == "Comment Studio":
             except Exception as e:
                 st.error(f"Error: {e}")
 
-    if do_sync or "cs_live_synced" not in st.session_state:
+    if do_sync:
         _all_pids = list({c["post_id"] for c in get_all().get("comments", [])})
         if _all_pids:
             _dead = []
@@ -1343,13 +1343,14 @@ elif page == "Comment Studio":
                 for _pid in _all_pids:
                     if not _reddit_post_live(_pid):
                         _dead.append(_pid)
-                    time.sleep(1.2)  # stay under Reddit rate limit
+                    time.sleep(1.2)
             for _dp in _dead:
                 delete_comment_by_post_id(_dp)
-            st.session_state["cs_live_synced"] = True
             if _dead:
-                st.success(f"Removed {len(_dead)} post(s) that no longer exist on Reddit.")
-                st.rerun()
+                st.success(f"Removed {len(_dead)} removed post(s).")
+            else:
+                st.success("All posts are live on Reddit.")
+            st.rerun()
 
     # ── Load data ─────────────────────────────────────────────────────────────
     data_cs      = get_all()
