@@ -1039,7 +1039,7 @@ if page == "Dashboard":
                     _d_link = p.get("permalink", "#")
                     _d_url  = _d_link if _d_link.startswith("http") else f"https://reddit.com{_d_link}"
                     c_a.link_button("Open Reddit", _d_url, use_container_width=True)
-                    if c_b.button("Comment Studio", key=f"dash_studio_{i+j}", use_container_width=True):
+                    if c_b.button("Send to Comment Studio", key=f"dash_studio_{i+j}", use_container_width=True):
                         st.session_state["_pre_sidebar_nav"] = "Comment Studio"
                         st.session_state["studio_post_id"] = p.get("id", "")
                         st.rerun()
