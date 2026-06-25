@@ -1230,7 +1230,7 @@ elif page == "Post Discovery":
             kw        = p.get("keyword", "")
             sub       = p.get("subreddit", "")
             link      = p.get("permalink", "#")
-            full_url  = link if link.startswith("http") else f"https://reddit.com{link}"
+            full_url  = link if link.startswith("http") else f"https://www.reddit.com{link}"
             ts_raw    = p.get("scraped_at", "")
             try:
                 age_h = _post_age_h(p)
