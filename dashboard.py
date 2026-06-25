@@ -1230,9 +1230,16 @@ elif page == "Post Discovery":
 
     fresh = [p for p in insights if _post_age_h(p) <= max_hours]
     fresh = sorted(fresh, key=lambda p: p.get("scraped_at", ""), reverse=True)
+    _pd_fallback = False
+    if not fresh and insights:
+        fresh = sorted(insights, key=lambda p: p.get("scraped_at", ""), reverse=True)
+        _pd_fallback = True
 
     if _sel_kws:
         fresh = [p for p in fresh if p.get("keyword") in _sel_kws]
+
+    if _pd_fallback and not _sel_kws:
+        st.caption("Showing previously fetched posts — fresh posts will appear once the background fetch completes.")
 
     # ── Keyword coverage badges ───────────────────────────────────────────────
     if fresh:
