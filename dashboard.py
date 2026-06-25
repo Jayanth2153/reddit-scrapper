@@ -790,7 +790,7 @@ if "auto_fetch_done" not in st.session_state:
         try:
             sync_keywords_to_file()
             st.session_state["auto_fetch_proc"] = subprocess.Popen(
-                ["python", "run_daily.py"],
+                ["python", "run_daily.py", "--scrape-only"],
                 cwd=str(Path.cwd()),
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
