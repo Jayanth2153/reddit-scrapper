@@ -979,7 +979,7 @@ if page == "Dashboard":
         with st.spinner("Fetching fresh posts..."):
             try:
                 sync_keywords_to_file()
-                r = subprocess.run(["python", "run_daily.py"], cwd=str(Path.cwd()),
+                r = subprocess.run(["python", "run_daily.py", "--scrape-only"], cwd=str(Path.cwd()),
                                    capture_output=True, text=True, timeout=300)
                 if r.returncode == 0:
                     st.success("Done!")
