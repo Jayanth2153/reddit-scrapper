@@ -29,8 +29,8 @@ class ScraperConfig:
     # ----- Tune these to your domain -----
     domain: str                = "application security API security DevSecOps"
     subreddits: List[str]      = field(default_factory=lambda: [
-        "devops", "cybersecurity", "devsecops",
-        "programming", "softwaresecurity", "kubernetes",
+        "netsec", "websecurity", "devops", "cybersecurity",
+        "devsecops", "programming", "softwaresecurity", "kubernetes",
     ])
     keywords: List[str]        = field(default_factory=lambda: [
         "API security testing", "SAST static analysis",
